@@ -1,12 +1,13 @@
+import { useEffect, useRef, useState } from "react";
 import Navigation from "../components/Navigation";
+import PageHero from "../components/PageHero";
+import { usePublicTestimonials } from "../hooks/usePublicTestimonials";
 
 import Slide1 from "../assets/images/slide-1.webp";
-import Slide2 from "../assets/images/slide-2.webp";
-import Slide3 from "../assets/images/slide-3.webp";
-import ThreeDays from "../assets/images/3-days.webp";
-import FourDays from "../assets/images/4-days.webp";
-import FiveDays from "../assets/images/5-days.webp";
-import FourteenDays from "../assets/images/14-days.webp";
+import AboutHospitality from "../assets/images/site/editorial/about-hospitality.jpg";
+import AboutTrail from "../assets/images/site/editorial/about-alpine-trail.jpg";
+import AboutJourney from "../assets/images/site/editorial/about-journey.jpg";
+import AboutShepherd from "../assets/images/site/editorial/about-shepherd.jpg";
 
 import {
   ArrowRight,
@@ -18,6 +19,7 @@ import {
   ShieldCheck,
   Sparkles,
   MapPin,
+  Star,
 } from "lucide-react";
 
 const values = [
@@ -85,42 +87,62 @@ const stats = [
   },
 ];
 
+const CountUp = ({ value }: { value: string }) => {
+  const target = Number(value.replace(/[^0-9]/g, ""));
+  const suffix = value.replace(/[0-9,]/g, "");
+  const [count, setCount] = useState(0);
+  const started = useRef(false);
+  const ref = useRef<HTMLSpanElement>(null);
+
+  useEffect(() => {
+    const element = ref.current;
+    if (!element || started.current) return;
+
+    const observer = new IntersectionObserver(([entry]) => {
+      if (!entry.isIntersecting || started.current) return;
+      started.current = true;
+      observer.disconnect();
+
+      const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      if (reducedMotion) {
+        setCount(target);
+        return;
+      }
+
+      const duration = 1400;
+      const startTime = performance.now();
+      let frameId = 0;
+      const animate = (now: number) => {
+        const progress = Math.min((now - startTime) / duration, 1);
+        const eased = 1 - Math.pow(1 - progress, 3);
+        setCount(Math.round(target * eased));
+        if (progress < 1) frameId = requestAnimationFrame(animate);
+      };
+      frameId = requestAnimationFrame(animate);
+    }, { threshold: 0.35 });
+
+    observer.observe(element);
+    return () => observer.disconnect();
+  }, [target]);
+
+  return <span ref={ref}>{count.toLocaleString("en-US")}{suffix}</span>;
+};
+
 const About = () => {
+  const testimonials = usePublicTestimonials();
+  const featuredTestimonial = testimonials[1] || testimonials[0];
+
   return (
     <div className="min-h-screen bg-white text-gray-900">
       <Navigation />
 
-      {/* HERO */}
-      <section className="relative min-h-[700px] flex items-center overflow-hidden">
-        <img
-          src={Slide1}
-          alt="Kyrgyzstan mountains"
-          className="absolute inset-0 w-full h-full object-cover"
-        />
-
-        <div className="absolute inset-0 bg-black/45" />
-
-        <div className="relative z-10 max-w-7xl mx-auto w-full px-4 md:px-8 pt-28">
-          <div className="max-w-3xl text-white">
-            <div className="inline-flex items-center gap-2 bg-white/15 backdrop-blur-md rounded-full px-4 py-2 mb-6">
-              <span className="w-2 h-2 bg-[#d7b85a] rounded-full" />
-              <span className="text-sm font-medium">
-                About Kyrgyz Tours
-              </span>
-            </div>
-
-            <h1 className="text-5xl md:text-7xl font-bold leading-tight">
-              We Bring You
-              <br />
-              Closer to Kyrgyzstan
-            </h1>
-
-            <p className="mt-7 text-lg md:text-xl text-white/90 leading-relaxed max-w-2xl">
-              We create unforgettable journeys through the mountains,
-              lakes, valleys and nomadic culture of one of Central Asia's
-              most extraordinary countries.
-            </p>
-
+      <PageHero
+        image={Slide1}
+        imageAlt="A Kyrgyz eagle hunter riding across a mountain valley"
+        eyebrow="About Kyrgyz Tours"
+        title="We Bring You Closer to Kyrgyzstan"
+        description="We create unforgettable journeys through the mountains, lakes, valleys and nomadic culture of one of Central Asia's most extraordinary countries."
+      >
             <div className="mt-9 flex flex-wrap gap-4">
               <a
                 href="/itineraries"
@@ -137,9 +159,7 @@ const About = () => {
                 Start Your Journey
               </a>
             </div>
-          </div>
-        </div>
-      </section>
+      </PageHero>
 
       {/* OUR STORY */}
       <section className="py-24 px-4 md:px-8">
@@ -196,24 +216,24 @@ const About = () => {
             <div className="grid grid-cols-2 gap-4">
               <div className="pt-12">
                 <img
-                  src={Slide2}
-                  alt="Kyrgyzstan landscape"
+                  src={AboutHospitality}
+                  alt="Kyrgyz family welcoming visitors inside a yurt"
                   className="w-full h-[340px] object-cover rounded-3xl"
                 />
               </div>
 
               <div>
                 <img
-                  src={Slide3}
-                  alt="Kyrgyzstan nature"
+                  src={AboutTrail}
+                  alt="A trail through a Kyrgyz alpine valley"
                   className="w-full h-[340px] object-cover rounded-3xl"
                 />
               </div>
 
               <div className="col-span-2">
                 <img
-                  src={FourDays}
-                  alt="Travel in Kyrgyzstan"
+                  src={AboutShepherd}
+                  alt="A Kyrgyz shepherd and flock in a mountain pasture"
                   className="w-full h-[240px] object-cover rounded-3xl"
                 />
               </div>
@@ -375,7 +395,7 @@ const About = () => {
                 className="bg-[#f4f5f0] rounded-3xl p-7 md:p-10 text-center"
               >
                 <div className="text-4xl md:text-5xl font-bold text-[#4A5C23]">
-                  {stat.number}
+                  <CountUp value={stat.number} />
                 </div>
 
                 <p className="mt-3 text-gray-600">
@@ -383,35 +403,6 @@ const About = () => {
                 </p>
               </div>
             ))}
-          </div>
-        </div>
-      </section>
-
-      {/* PHOTO STORY */}
-      <section className="py-10 px-4 md:px-8">
-        <div className="max-w-7xl mx-auto">
-          <div className="grid grid-cols-12 gap-4 md:gap-6">
-            <div className="col-span-12 md:col-span-7">
-              <img
-                src={FiveDays}
-                alt="Kyrgyzstan mountains"
-                className="w-full h-[420px] md:h-[560px] object-cover rounded-3xl"
-              />
-            </div>
-
-            <div className="col-span-12 md:col-span-5 grid grid-rows-2 gap-4 md:gap-6">
-              <img
-                src={ThreeDays}
-                alt="Ala-Archa"
-                className="w-full h-[260px] md:h-full object-cover rounded-3xl"
-              />
-
-              <img
-                src={FourteenDays}
-                alt="Discover Kyrgyzstan"
-                className="w-full h-[260px] md:h-full object-cover rounded-3xl"
-              />
-            </div>
           </div>
         </div>
       </section>
@@ -474,20 +465,10 @@ const About = () => {
 
             <div className="relative">
               <img
-                src={Slide3}
+                src={AboutJourney}
                 alt="Future of travel in Kyrgyzstan"
                 className="w-full h-[550px] object-cover rounded-3xl"
               />
-
-              <div className="absolute bottom-6 left-6 right-6 bg-white/95 backdrop-blur-md rounded-2xl p-6">
-                <p className="text-sm text-gray-500">
-                  Our vision
-                </p>
-
-                <p className="mt-2 text-xl font-bold text-gray-900">
-                  Make Kyrgyzstan easier to discover, one journey at a time.
-                </p>
-              </div>
             </div>
           </div>
         </div>
@@ -496,33 +477,37 @@ const About = () => {
       {/* CTA */}
       <section className="px-4 md:px-8 pb-24">
         <div className="max-w-7xl mx-auto relative overflow-hidden rounded-[2rem]">
-          <img
-            src={Slide2}
-            alt="Kyrgyzstan"
-            className="absolute inset-0 w-full h-full object-cover"
-          />
+          <div className="relative z-10 rounded-[2rem] bg-[#17200f] py-12 px-7 text-white md:py-16 md:px-14">
+            <div className="grid gap-10 md:grid-cols-2 md:items-center md:gap-14">
+              <div className="text-center md:text-left">
+                <h2 className="text-4xl md:text-5xl font-bold">
+                  Your Kyrgyzstan adventure starts here.
+                </h2>
 
-          <div className="absolute inset-0 bg-black/55" />
+                <p className="max-w-2xl mt-5 text-lg text-white/75">
+                  Explore breathtaking landscapes, experience nomadic culture
+                  and create memories that stay with you long after the journey.
+                </p>
 
-          <div className="relative z-10 py-24 px-6 md:px-12 text-center text-white">
-            <h2 className="text-4xl md:text-6xl font-bold">
-              Your Kyrgyzstan
-              <br />
-              adventure starts here.
-            </h2>
+                <a
+                  href="/itineraries"
+                  className="inline-flex items-center gap-2 mt-7 bg-white text-gray-900 px-8 py-4 rounded-full font-semibold hover:bg-gray-100 transition-colors"
+                >
+                  Explore Our Itineraries
+                  <ArrowRight className="w-5 h-5" />
+                </a>
+              </div>
 
-            <p className="max-w-2xl mx-auto mt-6 text-lg text-white/85">
-              Explore breathtaking landscapes, experience nomadic culture
-              and create memories that stay with you long after the journey.
-            </p>
-
-            <a
-              href="/itineraries"
-              className="inline-flex items-center gap-2 mt-9 bg-white text-gray-900 px-8 py-4 rounded-full font-semibold hover:bg-gray-100 transition-colors"
-            >
-              Explore Our Itineraries
-              <ArrowRight className="w-5 h-5" />
-            </a>
+              <blockquote className="border-l-2 border-[#d7b85a] pl-6 md:pl-8">
+                <div className="mb-4 flex gap-1 text-[#d7b85a]" aria-label={`${featuredTestimonial?.rating || 5} out of 5 stars`}>
+                  {Array.from({ length: featuredTestimonial?.rating || 5 }, (_, i) => <Star key={i} className="h-4 w-4 fill-current" />)}
+                </div>
+                <p className="text-xl leading-relaxed md:text-2xl">
+                  “{featuredTestimonial?.text || "Discover the places and culture that make every Kyrgyzstan journey unique."}”
+                </p>
+                <footer className="mt-5 text-sm text-white/65">{featuredTestimonial?.name || "Kyrgyz Tours"} <span className="mx-1">·</span> {featuredTestimonial?.country || "Traveler"}</footer>
+              </blockquote>
+            </div>
           </div>
         </div>
       </section>

@@ -1,39 +1,57 @@
 import { useEffect, useState } from "react";
 import Navigation from "../components/Navigation";
-import { ArrowRight, ChevronLeft, ChevronRight, X } from "lucide-react";
+import PageHero from "../components/PageHero";
+import { ArrowRight, ChevronLeft, ChevronRight, X, Images } from "lucide-react";
+import { supabase } from "../lib/supabase";
+import { usePublicTestimonials } from "../hooks/usePublicTestimonials";
 
-import Slide1 from "../assets/images/slide-1.webp";
-import Slide2 from "../assets/images/slide-2.webp";
-import Slide3 from "../assets/images/slide-3.webp";
-import ThreeDays from "../assets/images/3-days.webp";
-import FourDays from "../assets/images/4-days.webp";
-import FiveDays from "../assets/images/5-days.webp";
-import FourteenDays from "../assets/images/14-days.webp";
+import GalleryHero from "../assets/images/site/hero/hero-gallery.jpg";
+import IssykKul from "../assets/images/site/gallery/gallery-issyk-kul.jpg";
+import AlaArcha from "../assets/images/site/gallery/gallery-ala-archa.jpg";
+import SongKulDusk from "../assets/images/site/gallery/gallery-song-kul-dusk.jpg";
+import Craft from "../assets/images/site/gallery/gallery-craft.jpg";
+import Burana from "../assets/images/site/gallery/gallery-burana.jpg";
+import Horseman from "../assets/images/site/gallery/gallery-horseman.jpg";
 
 const galleryImages = [
-  { image: Slide1, title: "Mountain Adventures", category: "Nature" },
-  { image: Slide2, title: "The Beauty of Kyrgyzstan", category: "Landscapes" },
-  { image: Slide3, title: "Nature & Culture", category: "Experience" },
-  { image: ThreeDays, title: "Ala-Archa", category: "Mountains" },
-  { image: FourDays, title: "Issyk-Kul & Song-Kul", category: "Lakes" },
-  { image: FiveDays, title: "Karakol", category: "Adventure" },
-  { image: FourteenDays, title: "Across Kyrgyzstan", category: "Journey" },
+  { image: IssykKul, title: "The Shores of Issyk-Kul", category: "Lake" },
+  { image: AlaArcha, title: "Ala-Archa National Park", category: "Mountains" },
+  { image: SongKulDusk, title: "Evening at Song-Kul", category: "Nomadic Life" },
+  { image: Craft, title: "The Art of Shyrdak", category: "Kyrgyz Culture" },
+  { image: Burana, title: "Burana Tower", category: "History" },
+  { image: Horseman, title: "Life on the Steppe", category: "Tradition" },
 ];
+type GalleryPhoto = { id: string; image_url: string; title: string; category: string };
 
 const Gallery = () => {
   const [activeImageIndex, setActiveImageIndex] = useState<number | null>(null);
+  const [showAllPhotos, setShowAllPhotos] = useState(false);
+  const [managedPhotos, setManagedPhotos] = useState<GalleryPhoto[] | null>(null);
+  const visiblePhotos = managedPhotos ?? galleryImages;
+  const [featuredReview] = usePublicTestimonials();
+
+  useEffect(() => {
+    let active = true;
+    supabase.from("gallery_photos").select("id,image_url,title,category").order("sort_order").order("created_at")
+      .then(({ data, error }) => {
+        if (!active) return;
+        if (error) console.error("Failed to load gallery photos:", error.message);
+        else setManagedPhotos(data ?? []);
+      });
+    return () => { active = false; };
+  }, []);
 
   const closeLightbox = () => setActiveImageIndex(null);
 
   const showPreviousImage = () => {
     setActiveImageIndex((current) =>
-      current === null ? null : (current - 1 + galleryImages.length) % galleryImages.length
+      current === null ? null : (current - 1 + visiblePhotos.length) % visiblePhotos.length
     );
   };
 
   const showNextImage = () => {
     setActiveImageIndex((current) =>
-      current === null ? null : (current + 1) % galleryImages.length
+      current === null ? null : (current + 1) % visiblePhotos.length
     );
   };
 
@@ -60,25 +78,13 @@ const Gallery = () => {
     <div className="min-h-screen bg-white text-gray-900">
       <Navigation />
 
-      {/* HERO */}
-      <section className="relative flex min-h-[620px] items-center overflow-hidden">
-        <img src={Slide2} alt="Kyrgyzstan landscape" className="absolute inset-0 h-full w-full object-cover" />
-        <div className="absolute inset-0 bg-black/50" />
-        <div className="relative z-10 mx-auto w-full max-w-7xl px-4 pt-28 md:px-8">
-          <div className="max-w-3xl text-white">
-            <div className="mb-6 inline-flex items-center gap-2 rounded-full bg-white/15 px-4 py-2 backdrop-blur-md">
-              <span className="h-2 w-2 rounded-full bg-[#d7b85a]" />
-              <span className="text-sm font-medium">The Kyrgyzstan Experience</span>
-            </div>
-            <h1 className="text-5xl font-bold leading-tight md:text-7xl">
-              See the Journey.<br />Feel the Place.
-            </h1>
-            <p className="mt-7 max-w-2xl text-lg leading-relaxed text-white/90 md:text-xl">
-              Mountains, lakes, valleys and unforgettable moments. Take a visual journey through the places that make Kyrgyzstan unique.
-            </p>
-          </div>
-        </div>
-      </section>
+      <PageHero
+        image={GalleryHero}
+        imageAlt="Red sandstone cliffs above a green mountain valley in Kyrgyzstan"
+        eyebrow="The Kyrgyzstan Experience"
+        title="See the Journey. Feel the Place."
+        description="Mountains, lakes, valleys and unforgettable moments. Take a visual journey through the places that make Kyrgyzstan unique."
+      />
 
       {/* GALLERY */}
       <section className="px-4 py-24 md:px-8">
@@ -97,7 +103,7 @@ const Gallery = () => {
           </div>
 
           <div className="mt-14 grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-3">
-            {galleryImages.map((item, index) => (
+            {(showAllPhotos ? visiblePhotos : visiblePhotos.slice(0, 3)).map((item, index) => (
               <button
                 key={item.title}
                 type="button"
@@ -108,8 +114,9 @@ const Gallery = () => {
                 }`}
               >
                 <img
-                  src={item.image}
+                  src={"image_url" in item ? item.image_url : item.image}
                   alt={item.title}
+                  loading="lazy"
                   className={`w-full object-cover transition-transform duration-700 group-hover:scale-105 ${
                     index === 0 ? "h-[620px]" : "h-[300px]"
                   }`}
@@ -125,48 +132,45 @@ const Gallery = () => {
               </button>
             ))}
           </div>
-        </div>
-      </section>
 
-      {/* PHOTO STORY */}
-      <section className="bg-[#f4f5f0] px-4 py-24 md:px-8">
-        <div className="mx-auto grid max-w-7xl items-center gap-14 lg:grid-cols-2">
-          <div>
-            <div className="inline-flex items-center gap-2 rounded-full bg-white px-4 py-2">
-              <span className="h-2 w-2 rounded-full bg-[#4a5c23]" />
-              <span className="text-sm font-medium">More Than A Photograph</span>
-            </div>
-            <h2 className="mt-6 text-4xl font-bold leading-tight md:text-5xl">
-              Come for the views.<br />Stay for the stories.
-            </h2>
-            <p className="mt-6 text-lg leading-relaxed text-gray-600">
-              The most memorable part of traveling through Kyrgyzstan isn't always the destination. It's the people you meet, the roads you take and the moments you never planned for.
-            </p>
-            <a href="/itineraries" className="mt-8 inline-flex items-center gap-2 rounded-full bg-[#4A5C23] px-7 py-3.5 font-semibold text-white transition-colors hover:bg-[#364518]">
-              Explore Our Journeys <ArrowRight className="h-5 w-5" />
-            </a>
+          <div className="mt-10 flex justify-center">
+            <button
+              type="button"
+              onClick={() => setShowAllPhotos((shown) => !shown)}
+              aria-expanded={showAllPhotos}
+              className="inline-flex items-center gap-3 rounded-full border border-[#4A5C23] bg-[#4A5C23] px-8 py-4 text-sm font-semibold text-white transition hover:bg-[#35451a]"
+            >
+              <Images size={18} />
+              {showAllPhotos ? "Show fewer photos" : "View all photos"}
+            </button>
           </div>
-          <img src={Slide3} alt="Kyrgyzstan experience" className="h-[500px] w-full rounded-3xl object-cover" />
         </div>
       </section>
 
       {/* CTA */}
-      <section className="px-4 py-24 md:px-8">
-        <div className="relative mx-auto max-w-7xl overflow-hidden rounded-[2rem]">
-          <img src={FourteenDays} alt="Discover Kyrgyzstan" className="absolute inset-0 h-full w-full object-cover" />
-          <div className="absolute inset-0 bg-black/55" />
-          <div className="relative z-10 px-6 py-24 text-center text-white">
-            <h2 className="text-4xl font-bold md:text-6xl">Ready to see it<br />for yourself?</h2>
-            <p className="mt-6 text-lg text-white/85">Your Kyrgyzstan story could be the next one in our gallery.</p>
-            <a href="/contact" className="mt-8 inline-flex items-center gap-2 rounded-full bg-white px-8 py-4 font-semibold text-gray-900 transition-colors hover:bg-gray-100">
-              Start Your Journey <ArrowRight className="h-5 w-5" />
-            </a>
+      <section className="px-4 py-12 md:px-8 md:py-16">
+        <div className="mx-auto max-w-7xl overflow-hidden rounded-[2rem] bg-[#17200f]">
+          <div className={`grid gap-10 px-7 py-12 text-white md:items-center md:gap-14 md:px-14 md:py-16 ${featuredReview ? "md:grid-cols-2" : "md:grid-cols-1"}`}>
+            {featuredReview && <blockquote className="border-l-2 border-[#d7b85a] pl-6 md:pl-8">
+              <div className="mb-4 flex gap-1 text-[#d7b85a]" aria-label="5 out of 5 stars">
+                {Array.from({ length: featuredReview.rating }, (_, i) => <span key={i}>★</span>)}
+              </div>
+              <p className="text-xl leading-relaxed md:text-2xl">“{featuredReview.text}”</p>
+              <footer className="mt-5 text-sm text-white/65">{featuredReview.name} <span className="mx-1">·</span> {featuredReview.country}</footer>
+            </blockquote>}
+            <div className={featuredReview ? "text-center md:text-left" : "text-center"}>
+              <h2 className="text-4xl font-bold md:text-5xl">Ready to see it<br className="hidden md:block" /> for yourself?</h2>
+              <p className="mt-5 text-lg text-white/75">Your Kyrgyzstan story could be the next one in our gallery.</p>
+              <a href="/contact" className="mt-7 inline-flex items-center gap-2 rounded-full bg-white px-8 py-4 font-semibold text-gray-900 transition-colors hover:bg-gray-100">
+                Start Your Journey <ArrowRight className="h-5 w-5" />
+              </a>
+            </div>
           </div>
         </div>
       </section>
 
       {/* FULL-SCREEN PHOTO VIEWER */}
-      {activeImageIndex !== null && (
+      {activeImageIndex !== null && activeImageIndex < visiblePhotos.length && (
         <div
           className="fixed inset-0 z-[10000] flex items-center justify-center bg-black/95 p-4 sm:p-8"
           role="dialog"
@@ -184,14 +188,14 @@ const Gallery = () => {
 
           <div className="flex h-full w-full max-w-6xl flex-col items-center justify-center" onClick={(event) => event.stopPropagation()}>
             <img
-              key={galleryImages[activeImageIndex].image}
-              src={galleryImages[activeImageIndex].image}
-              alt={galleryImages[activeImageIndex].title}
+              key={"image_url" in visiblePhotos[activeImageIndex] ? visiblePhotos[activeImageIndex].image_url : visiblePhotos[activeImageIndex].image}
+              src={"image_url" in visiblePhotos[activeImageIndex] ? visiblePhotos[activeImageIndex].image_url : visiblePhotos[activeImageIndex].image}
+              alt={visiblePhotos[activeImageIndex].title}
               className="max-h-[calc(100vh-130px)] max-w-full rounded-lg object-contain"
             />
             <div className="mt-4 text-center text-white">
-              <p className="text-lg font-semibold">{galleryImages[activeImageIndex].title}</p>
-              <p className="mt-1 text-sm text-white/65">{activeImageIndex + 1} / {galleryImages.length}</p>
+              <p className="text-lg font-semibold">{visiblePhotos[activeImageIndex].title}</p>
+              <p className="mt-1 text-sm text-white/65">{activeImageIndex + 1} / {visiblePhotos.length}</p>
             </div>
           </div>
 

@@ -143,3 +143,7 @@ kyrgyz-tours/
 ├── vite.config.ts
 ├── tsconfig.json
 └── README.md
+# Admin content setup
+
+The admin content tools require the Supabase migration at `supabase/migrations/20261030120000_admin_content.sql`. Run it once in the Supabase SQL Editor before using the new photo uploads, gallery/review manager, and homepage seasonal tour controls. It adds the detail photo and homepage selection fields to `tours`, creates the gallery and testimonial tables, seeds the current gallery and review content, and creates the public `site-media` storage bucket with staff-only upload and delete access.
+

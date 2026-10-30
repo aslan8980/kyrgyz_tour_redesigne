@@ -1,15 +1,18 @@
 
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { ArrowRight, Clock, MapPin } from "lucide-react";
+import { ArrowRight, Clock, MapPin, Star } from "lucide-react";
 
 import Navigation from "../components/Navigation";
+import PageHero from "../components/PageHero";
 import { supabase } from "../lib/supabase";
+import { usePublicTestimonials } from "../hooks/usePublicTestimonials";
 
 import ThreeDays from "../assets/images/3-days.webp";
 import FourDays from "../assets/images/4-days.webp";
 import FiveDays from "../assets/images/5-days.webp";
 import FourteenDays from "../assets/images/14-days.webp";
+import ItinerariesHero from "../assets/images/site/hero/hero-itineraries.jpg";
 
 type Tour = {
   id: string;
@@ -32,6 +35,8 @@ const localImages: Record<string, string> = {
 };
 
 const Itineraries = () => {
+  const testimonials = usePublicTestimonials();
+  const featuredTestimonial = testimonials[1] || testimonials[0];
   const [tours, setTours] = useState<Tour[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -71,35 +76,13 @@ const Itineraries = () => {
     <div className="min-h-screen bg-white text-gray-900">
       <Navigation />
 
-      {/* HERO */}
-      <section className="relative flex min-h-[580px] items-center overflow-hidden">
-        <img
-          src={FourteenDays}
-          alt="Discover Kyrgyzstan"
-          className="absolute inset-0 h-full w-full object-cover"
-        />
-        <div className="absolute inset-0 bg-black/50" />
-
-        <div className="relative z-10 mx-auto w-full max-w-7xl px-4 pt-28 md:px-8">
-          <div className="max-w-3xl text-white">
-            <div className="mb-6 inline-flex items-center gap-2 rounded-full bg-white/15 px-4 py-2 backdrop-blur-md">
-              <span className="h-2 w-2 rounded-full bg-[#d7b85a]" />
-              <span className="text-sm font-medium">Our Journeys</span>
-            </div>
-
-            <h1 className="text-5xl font-bold leading-tight md:text-7xl">
-              Discover
-              <br />
-              Kyrgyzstan Your Way
-            </h1>
-
-            <p className="mt-7 max-w-2xl text-lg leading-relaxed text-white/90 md:text-xl">
-              From short mountain escapes to unforgettable journeys across
-              the country, choose the experience that fits your adventure.
-            </p>
-          </div>
-        </div>
-      </section>
+      <PageHero
+        image={ItinerariesHero}
+        imageAlt="Mountain landscape in Kyrgyzstan"
+        eyebrow="Our Journeys"
+        title="Discover Kyrgyzstan Your Way"
+        description="From short mountain escapes to unforgettable journeys across the country, choose the experience that fits your adventure."
+      />
 
       {/* INTRO AND TOURS */}
       <section className="px-4 py-20 md:px-8 md:py-24">
@@ -233,25 +216,37 @@ const Itineraries = () => {
 
       {/* CTA */}
       <section className="px-4 pb-20 md:px-8 md:pb-24">
-        <div className="mx-auto max-w-7xl rounded-[2rem] bg-[#17200f] px-6 py-16 text-center text-white md:px-12 md:py-20">
-          <h2 className="text-4xl font-bold md:text-5xl">
-            Not sure which journey
-            <br />
-            is right for you?
-          </h2>
+        <div className="mx-auto max-w-7xl rounded-[2rem] bg-[#17200f] px-7 py-12 text-white md:px-14 md:py-16">
+          <div className="grid gap-10 md:grid-cols-2 md:items-center md:gap-14">
+            <div className="text-center md:text-left">
+              <h2 className="text-4xl font-bold md:text-5xl">
+                Not sure which journey is right for you?
+              </h2>
 
-          <p className="mx-auto mt-6 max-w-2xl text-lg text-white/70">
-            Tell us what kind of experience you're looking for and we'll
-            help you plan your perfect Kyrgyzstan adventure.
-          </p>
+              <p className="mt-5 max-w-2xl text-lg text-white/70">
+                Tell us what kind of experience you're looking for and we'll
+                help you plan your perfect Kyrgyzstan adventure.
+              </p>
 
-          <Link
-            to="/contact"
-            className="mt-8 inline-flex items-center gap-2 rounded-full bg-white px-8 py-4 font-semibold text-gray-900 transition-colors hover:bg-gray-100"
-          >
-            Talk to Us
-            <ArrowRight className="h-5 w-5" />
-          </Link>
+              <Link
+                to="/contact"
+                className="mt-7 inline-flex items-center gap-2 rounded-full bg-white px-8 py-4 font-semibold text-gray-900 transition-colors hover:bg-gray-100"
+              >
+                Talk to Us
+                <ArrowRight className="h-5 w-5" />
+              </Link>
+            </div>
+
+            <blockquote className="border-l-2 border-[#d7b85a] pl-6 md:pl-8">
+              <div className="mb-4 flex gap-1 text-[#d7b85a]" aria-label={`${featuredTestimonial?.rating || 5} out of 5 stars`}>
+                {Array.from({ length: featuredTestimonial?.rating || 5 }, (_, i) => <Star key={i} className="h-4 w-4 fill-current" />)}
+              </div>
+              <p className="text-xl leading-relaxed md:text-2xl">
+                “{featuredTestimonial?.text || "Discover the places and culture that make every Kyrgyzstan journey unique."}”
+              </p>
+              <footer className="mt-5 text-sm text-white/65">{featuredTestimonial?.name || "Kyrgyz Tours"} <span className="mx-1">·</span> {featuredTestimonial?.country || "Traveler"}</footer>
+            </blockquote>
+          </div>
         </div>
       </section>
     </div>

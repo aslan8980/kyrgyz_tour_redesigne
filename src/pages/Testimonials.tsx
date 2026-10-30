@@ -1,84 +1,30 @@
 import Navigation from "../components/Navigation";
+import PageHero from "../components/PageHero";
 import { ArrowRight, Quote, Star } from "lucide-react";
+import { usePublicTestimonials } from "../hooks/usePublicTestimonials";
 
-import Slide1 from "../assets/images/slide-1.webp";
-import Slide3 from "../assets/images/slide-3.webp";
-import FourDays from "../assets/images/4-days.webp";
-
-const testimonials = [
-  {
-    name: "Alex",
-    country: "Germany",
-    text: "Kyrgyzstan surprised me with its incredible mountains, beautiful lakes and warm hospitality.",
-  },
-  {
-    name: "Sofia",
-    country: "Italy",
-    text: "The landscapes were unforgettable. From the mountains to Issyk-Kul, every day felt like a new adventure.",
-  },
-  {
-    name: "Daniel",
-    country: "United Kingdom",
-    text: "A completely different travel experience. The nature, culture and nomadic traditions were amazing.",
-  },
-  {
-    name: "Emma",
-    country: "France",
-    text: "The combination of mountains, lakes and nomadic culture made this one of my favorite trips.",
-  },
-  {
-    name: "Michael",
-    country: "United States",
-    text: "Kyrgyzstan feels incredibly authentic. The landscapes and hospitality were unforgettable.",
-  },
-  {
-    name: "Anna",
-    country: "Poland",
-    text: "A beautiful country with incredible nature. I would definitely come back again.",
-  },
-];
+import TestimonialsHero from "../assets/images/site/hero/hero-testimonials.jpg";
+import GatheringPhoto from "../assets/images/site/editorial/testimonial-gathering.jpg";
+import ReflectionPhoto from "../assets/images/site/editorial/testimonial-reflection.jpg";
 
 const Testimonials = () => {
+  const testimonials = usePublicTestimonials();
+  const featuredTestimonial = testimonials[1] || testimonials[0];
+
   return (
     <div className="min-h-screen bg-white text-gray-900">
       <Navigation />
 
-      {/* HERO */}
-      <section className="relative min-h-[620px] flex items-center overflow-hidden">
-        <img
-          src={Slide1}
-          alt="Kyrgyzstan mountains"
-          className="absolute inset-0 w-full h-full object-cover"
-        />
-
-        <div className="absolute inset-0 bg-black/50" />
-
-        <div className="relative z-10 max-w-7xl mx-auto w-full px-4 md:px-8 pt-28">
-          <div className="max-w-3xl text-white">
-            <div className="inline-flex items-center gap-2 bg-white/15 backdrop-blur-md rounded-full px-4 py-2 mb-6">
-              <span className="w-2 h-2 bg-[#d7b85a] rounded-full" />
-              <span className="text-sm font-medium">
-                Traveler Stories
-              </span>
-            </div>
-
-            <h1 className="text-5xl md:text-7xl font-bold leading-tight">
-              Stories From
-              <br />
-              The Journey
-            </h1>
-
-            <p className="mt-7 text-lg md:text-xl text-white/90 leading-relaxed max-w-2xl">
-              Traveling is about more than places. It is about the people
-              you meet, the memories you create and the stories you take
-              home with you.
-            </p>
-          </div>
-        </div>
-      </section>
+      <PageHero
+        image={TestimonialsHero}
+        imageAlt="Travelers and a Kyrgyz guide celebrating on a mountain ridge"
+        eyebrow="Traveler Stories"
+        title="Stories From The Journey"
+        description="Traveling is about more than places. It is about the people you meet, the memories you create and the stories you take home with you."
+      />
 
       {/* INTRO */}
-      <section className="py-24 px-4 md:px-8">
+      <section className="py-12 px-4 md:px-8 md:py-16">
         <div className="max-w-4xl mx-auto text-center">
           <div className="inline-flex items-center gap-2 bg-[#c9cebd] rounded-full px-4 py-2">
             <span className="w-2 h-2 bg-[#4a5c23] rounded-full" />
@@ -100,12 +46,12 @@ const Testimonials = () => {
       </section>
 
       {/* FEATURED QUOTE */}
-      <section className="px-4 md:px-8 pb-24">
+      <section className="px-4 pb-12 md:px-8 md:pb-16">
         <div className="max-w-7xl mx-auto bg-[#17200f] rounded-[2rem] overflow-hidden">
           <div className="grid lg:grid-cols-2">
             <div className="relative min-h-[420px]">
               <img
-                src={FourDays}
+                src={ReflectionPhoto}
                 alt="Issyk-Kul and Song-Kul"
                 className="absolute inset-0 w-full h-full object-cover"
               />
@@ -113,18 +59,17 @@ const Testimonials = () => {
               <div className="absolute inset-0 bg-black/25" />
             </div>
 
-            <div className="p-10 md:p-14 lg:p-16 text-white flex flex-col justify-center">
+            <div className="p-8 md:p-10 lg:p-12 text-white flex flex-col justify-center">
               <Quote className="w-12 h-12 text-[#d7b85a]" />
 
               <p className="mt-7 text-2xl md:text-3xl font-medium leading-relaxed">
-                “The landscapes were unforgettable. Every day felt like
-                discovering a completely different world.”
+                “{featuredTestimonial?.text || "Discover the places and culture that make every Kyrgyzstan journey unique."}”
               </p>
 
               <div className="mt-8">
-                <p className="font-bold">Sofia</p>
+                <p className="font-bold">{featuredTestimonial?.name || "Kyrgyz Tours"}</p>
                 <p className="text-white/60 mt-1">
-                  Italy · Traveler
+                  {featuredTestimonial?.country || "Traveler"} · Traveler
                 </p>
               </div>
             </div>
@@ -151,19 +96,20 @@ const Testimonials = () => {
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mt-14">
             {testimonials.map((testimonial) => (
               <article
-                key={`${testimonial.name}-${testimonial.country}`}
+                key={testimonial.id}
                 className="bg-white rounded-3xl p-7 md:p-8 hover:shadow-xl transition-shadow duration-300"
               >
                 <div className="flex gap-1">
-                  {[1, 2, 3, 4, 5].map((star) => (
+                  {Array.from({ length: testimonial.rating }, (_, index) => (
                     <Star
-                      key={star}
+                      key={index}
                       className="w-4 h-4 fill-[#d7b85a] text-[#d7b85a]"
                     />
                   ))}
                 </div>
 
-                <p className="mt-7 text-gray-600 leading-relaxed text-lg">
+                {testimonial.title && <h3 className="mt-5 font-semibold text-gray-900">{testimonial.title}</h3>}
+                <p className="mt-4 text-gray-600 leading-relaxed text-lg">
                   “{testimonial.text}”
                 </p>
 
@@ -186,7 +132,7 @@ const Testimonials = () => {
       <section className="py-24 px-4 md:px-8">
         <div className="max-w-7xl mx-auto grid lg:grid-cols-2 gap-14 items-center">
           <img
-            src={Slide3}
+                src={GatheringPhoto}
             alt="Kyrgyzstan nature"
             className="w-full h-[500px] object-cover rounded-3xl"
           />
@@ -223,23 +169,30 @@ const Testimonials = () => {
       </section>
 
       {/* CTA */}
-      <section className="px-4 md:px-8 pb-24">
-        <div className="max-w-7xl mx-auto bg-[#17200f] rounded-[2rem] py-20 px-6 text-center text-white">
-          <h2 className="text-4xl md:text-5xl font-bold">
-            Your story starts here.
-          </h2>
-
-          <p className="mt-6 max-w-2xl mx-auto text-lg text-white/70">
-            Discover Kyrgyzstan and create memories worth sharing.
-          </p>
-
-          <a
-            href="/contact"
-            className="inline-flex items-center gap-2 mt-8 bg-white text-gray-900 px-8 py-4 rounded-full font-semibold hover:bg-gray-100 transition-colors"
-          >
-            Start Your Journey
-            <ArrowRight className="w-5 h-5" />
-          </a>
+      <section className="px-4 md:px-8 pb-12 md:pb-16">
+        <div className="max-w-7xl mx-auto bg-[#17200f] rounded-[2rem] py-12 px-7 text-white md:py-16 md:px-14">
+          <div className="grid gap-10 md:grid-cols-2 md:items-center md:gap-14">
+            <div className="text-center md:text-left">
+              <h2 className="text-4xl md:text-5xl font-bold">Your story starts here.</h2>
+              <p className="mt-5 max-w-xl text-lg text-white/70">
+                Discover Kyrgyzstan and create memories worth sharing.
+              </p>
+              <a
+                href="/contact"
+                className="inline-flex items-center gap-2 mt-7 bg-white text-gray-900 px-8 py-4 rounded-full font-semibold hover:bg-gray-100 transition-colors"
+              >
+                Start Your Journey
+                <ArrowRight className="w-5 h-5" />
+              </a>
+            </div>
+            <blockquote className="border-l-2 border-[#d7b85a] pl-6 md:pl-8">
+              <div className="mb-4 flex gap-1 text-[#d7b85a]" aria-label={`${featuredTestimonial?.rating || 5} out of 5 stars`}>
+                {Array.from({ length: featuredTestimonial?.rating || 5 }, (_, i) => <Star key={i} className="h-4 w-4 fill-current" />)}
+              </div>
+              <p className="text-xl leading-relaxed md:text-2xl">“{featuredTestimonial?.text || "Discover the places and culture that make every Kyrgyzstan journey unique."}”</p>
+              <footer className="mt-5 text-sm text-white/65">{featuredTestimonial?.name || "Kyrgyz Tours"} <span className="mx-1">·</span> {featuredTestimonial?.country || "Traveler"}</footer>
+            </blockquote>
+          </div>
         </div>
       </section>
     </div>

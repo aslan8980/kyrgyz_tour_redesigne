@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import KyrgyzstanImage from "../assets/images/cheetah-close.webp";
+import KyrgyzstanImage from "../assets/images/site/editorial/home-about-ala-archa.jpg";
 
 const Welcome = () => {
   const handleExploreClick = () => {
@@ -15,12 +15,12 @@ const Welcome = () => {
   };
 
   return (
-    <section className="kt-section-blend bg-[#10120f] text-white py-20 px-4 md:px-8">
+    <section className="bg-[#f5f5ef] text-[#283128] py-20 px-4 md:px-8">
       <div className="max-w-7xl mx-auto grid md:grid-cols-2 gap-8 items-center">
         
         {/* Text */}
         <div className="space-y-6">
-          <h3 className="inline-flex items-center gap-2 bg-white/10 border border-white/15 text-white rounded-full px-4 py-2">
+          <h3 className="inline-flex items-center gap-2 bg-[#e9eddf] border border-[#dfe4d5] text-[#283128] rounded-full px-4 py-2">
             <span className="w-2 h-2 bg-[#4a5c23] rounded-full"></span>
 
             <span className="text-sm font-medium">
@@ -32,7 +32,7 @@ const Welcome = () => {
             Discover the Land of Mountains and Nomads
           </h2>
 
-          <p className="text-white/70 leading-relaxed">
+          <p className="text-gray-600 leading-relaxed">
             Kyrgyzstan is a country of breathtaking mountains,
             crystal-clear lakes, vast valleys and centuries-old
             nomadic traditions. From peaceful mountain landscapes
@@ -40,7 +40,7 @@ const Welcome = () => {
             something new to discover.
           </p>
 
-          <p className="text-white/70 leading-relaxed">
+          <p className="text-gray-600 leading-relaxed">
             Explore the beauty of Issyk-Kul, hike through
             Ala-Archa, discover Karakol and experience the unique
             hospitality and culture of the Kyrgyz people.

@@ -2,6 +2,7 @@
 import { FormEvent, useEffect, useState } from "react";
 import { X, Plus, Trash2, LoaderCircle } from "lucide-react";
 import { supabase } from "../lib/supabase";
+import { uploadImage } from "../lib/uploadImage";
 
 type TourRecord = {
   id?: string;
@@ -16,6 +17,8 @@ type TourRecord = {
   price: number;
   currency: string;
   main_image: string;
+  detail_image: string;
+  show_on_home: boolean;
   highlights: string[];
   itinerary: { day: number; title: string; description: string }[];
   included_services: string[];
@@ -41,6 +44,8 @@ const emptyTour: TourRecord = {
   price: 0,
   currency: "EUR",
   main_image: "",
+  detail_image: "",
+  show_on_home: false,
   highlights: [],
   itinerary: [{ day: 1, title: "", description: "" }],
   included_services: [],
@@ -88,6 +93,7 @@ export default function TourEditor({
   const [excludedText, setExcludedText] = useState("");
   const [itineraryText, setItineraryText] = useState("");
   const [saving, setSaving] = useState(false);
+  const [uploadingImage, setUploadingImage] = useState<"main_image" | "detail_image" | null>(null);
   const [error, setError] = useState("");
 
   useEffect(() => {
@@ -136,6 +142,19 @@ export default function TourEditor({
     value: TourRecord[K]
   ) => {
     setForm((previous) => ({ ...previous, [key]: value }));
+  };
+
+  const handleImageUpload = async (key: "main_image" | "detail_image", file?: File) => {
+    if (!file) return;
+    setUploadingImage(key);
+    setError("");
+    try {
+      update(key, await uploadImage(file, "tours"));
+    } catch (uploadError) {
+      setError(uploadError instanceof Error ? uploadError.message : "Не удалось загрузить фото.");
+    } finally {
+      setUploadingImage(null);
+    }
   };
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
@@ -188,6 +207,8 @@ export default function TourEditor({
         price: Number(form.price) || 0,
         currency: form.currency,
         main_image: form.main_image.trim() || null,
+        detail_image: form.detail_image.trim() || null,
+        show_on_home: form.show_on_home,
         highlights: linesToArray(highlightsText),
         itinerary,
         included_services: linesToArray(includedText),
@@ -398,7 +419,7 @@ export default function TourEditor({
 
           <section>
             <h3 className="mb-4 text-lg font-bold text-[#17200f]">
-              Цена и фотография
+              Цена и фотографии
             </h3>
 
             <div className="grid gap-5 sm:grid-cols-2">
@@ -427,22 +448,38 @@ export default function TourEditor({
                 </select>
               </div>
 
-              <div className="sm:col-span-2">
-                <label className={labelClass}>
-                  URL главной фотографии
-                </label>
+              {([[
+                "main_image", "Фото карточки тура", "Показывается в списках туров и на главной.",
+              ], ["detail_image", "Фото внутри страницы тура", "Показывается в верхней части страницы после открытия тура."]] as const).map(([key, title, hint]) => (
+                <div key={key}>
+                  <label className={labelClass}>{title}</label>
+                  <input
+                    type="url"
+                    className={inputClass}
+                    value={form[key] || ""}
+                    onChange={(e) => update(key, e.target.value)}
+                    placeholder="URL изображения или загрузите файл ниже"
+                  />
+                  <input
+                    type="file"
+                    accept="image/jpeg,image/png,image/webp,image/gif"
+                    className="mt-3 block w-full text-sm text-gray-600 file:mr-3 file:rounded-lg file:border-0 file:bg-[#e9eddf] file:px-4 file:py-2 file:font-medium file:text-[#39481b]"
+                    onChange={(e) => void handleImageUpload(key, e.target.files?.[0])}
+                  />
+                  {uploadingImage === key && <p className="mt-2 text-xs text-[#4A5C23]">Загружаем фото…</p>}
+                  {form[key] && <img src={form[key]} alt="Предпросмотр" className="mt-3 h-32 w-full rounded-xl object-cover" />}
+                  <p className="mt-1 text-xs text-gray-500">{hint}</p>
+                </div>
+              ))}
+              <label className="sm:col-span-2 flex items-start gap-3 rounded-xl border border-gray-200 bg-white p-4">
                 <input
-                  type="url"
-                  className={inputClass}
-                  value={form.main_image || ""}
-                  onChange={(e) => update("main_image", e.target.value)}
-                  placeholder="https://..."
+                  type="checkbox"
+                  checked={form.show_on_home}
+                  onChange={(e) => update("show_on_home", e.target.checked)}
+                  className="mt-1 h-4 w-4 accent-[#4A5C23]"
                 />
-                <p className="mt-1 text-xs text-gray-500">
-                  Пока вставь прямую ссылку на изображение. Загрузку файлов
-                  добавим отдельно.
-                </p>
-              </div>
+                <span><span className="block text-sm font-semibold text-gray-800">Показывать в сезонных турах на главной</span><span className="mt-1 block text-xs text-gray-500">Этот тур появится под заголовком Explore Kyrgyzstan with Expert-Planned Journeys.</span></span>
+              </label>
             </div>
           </section>
 
@@ -531,7 +568,7 @@ export default function TourEditor({
 
             <button
               type="submit"
-              disabled={saving}
+              disabled={saving || uploadingImage !== null}
               className="inline-flex items-center gap-2 rounded-full bg-[#4A5C23] px-6 py-3 text-sm font-semibold text-white hover:bg-[#39481b] disabled:opacity-60"
             >
               {saving ? (

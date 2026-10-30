@@ -11,12 +11,14 @@ import {
 } from "lucide-react";
 
 import Navigation from "../components/Navigation";
+import PageHero from "../components/PageHero";
 import { supabase } from "../lib/supabase";
 
 import ThreeDays from "../assets/images/3-days.webp";
 import FourDays from "../assets/images/4-days.webp";
 import FiveDays from "../assets/images/5-days.webp";
 import FourteenDays from "../assets/images/14-days.webp";
+import SavedHero from "../assets/images/site/hero/hero-saved.jpg";
 
 const FAVORITES_KEY = "kyrgyz-tours-favorites";
 
@@ -128,7 +130,15 @@ const SavedTours = () => {
     <div className="min-h-screen bg-white text-gray-900">
       <Navigation />
 
-      <section className="px-4 pb-10 pt-36 md:px-8 md:pt-40">
+      <PageHero
+        image={SavedHero}
+        imageAlt="Mountain scenery in Kyrgyzstan"
+        eyebrow="Your Travel Wishlist"
+        title="Saved Journeys"
+        description="All the places and adventures you want to explore in Kyrgyzstan, collected in one place."
+      />
+
+      <section className="px-4 pb-10 pt-10 md:px-8">
         <div className="mx-auto max-w-7xl">
           <Link
             to="/itineraries"
@@ -138,18 +148,7 @@ const SavedTours = () => {
             Back to itineraries
           </Link>
 
-          <div className="mt-5 flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
-            <div>
-              <h1 className="text-4xl font-bold leading-tight md:text-6xl">
-                Saved journeys.
-              </h1>
-
-              <p className="mt-4 max-w-2xl text-lg leading-relaxed text-gray-600">
-                All the places and adventures you want to explore in
-                Kyrgyzstan, collected in one place.
-              </p>
-            </div>
-
+          <div className="flex justify-end">
             <span className="text-sm text-gray-500">
               {savedTours.length}{" "}
               {savedTours.length === 1 ? "journey" : "journeys"} saved

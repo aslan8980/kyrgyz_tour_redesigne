@@ -6,12 +6,13 @@ import {
   ChevronLeft,
   ChevronRight,
 } from "lucide-react";
-import Slide2 from "../assets/images/slide-2.webp";
-import Slide3 from "../assets/images/slide-3.webp";
+import Slide2 from "../assets/images/site/hero/home-journey-b.jpg";
+import Slide3 from "../assets/images/site/hero/home-journey-c.jpg";
 
 const slides = [
   {
     image: "/images/kyrgyzstan-hero.png",
+    imageAlt: "A mountain road crossing the Tian Shan in Kyrgyzstan",
     eyebrow: "ADVENTURE · NATURE · CULTURE",
     title: "Kyrgyzstan.\nA journey beyond.",
     description:
@@ -19,6 +20,7 @@ const slides = [
   },
   {
     image: Slide2,
+    imageAlt: "A horse rider crossing an alpine valley with yurts in Kyrgyzstan",
     eyebrow: "WILD LANDSCAPES · OPEN ROADS",
     title: "Find your\nown adventure.",
     description:
@@ -26,6 +28,7 @@ const slides = [
   },
   {
     image: Slide3,
+    imageAlt: "Kyrgyz family welcoming travelers beside a yurt",
     eyebrow: "TRADITION · HOSPITALITY · DISCOVERY",
     title: "Feel the spirit\nof the mountains.",
     description:
@@ -74,7 +77,7 @@ const Hero = () => {
         >
           <img
             src={slide.image}
-            alt="Mountain landscape in Kyrgyzstan"
+            alt={slide.imageAlt}
             className="absolute inset-0 h-full w-full object-cover object-center"
             fetchPriority={index === 0 ? "high" : "auto"}
           />

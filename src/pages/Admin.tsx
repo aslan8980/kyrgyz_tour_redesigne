@@ -17,6 +17,7 @@ import {
 import type { User } from "@supabase/supabase-js";
 import { supabase } from "../lib/supabase";
 import TourEditor from "./TourEditor";
+import AdminSiteContent from "./AdminSiteContent";
 
 
 
@@ -38,7 +39,19 @@ type Tour = {
   included_services: string[];
   excluded_services: string[];
   status: string;
+  detail_image: string | null;
+  show_on_home: boolean;
 };
+
+type AdminSection = "tours" | "seasonal" | "gallery" | "reviews";
+
+function errorMessage(error: unknown, fallback: string) {
+  if (error instanceof Error) return error.message;
+  if (error && typeof error === "object" && "message" in error && typeof error.message === "string") {
+    return error.message;
+  }
+  return fallback;
+}
 
 
 export default function Admin() {
@@ -52,6 +65,7 @@ export default function Admin() {
 
   const [editorOpen, setEditorOpen] = useState(false);
   const [editingTour, setEditingTour] = useState<Tour | null>(null);
+  const [section, setSection] = useState<AdminSection>("tours");
 
   const checkAccess = useCallback(async () => {
     setAuthChecked(false);
@@ -109,7 +123,7 @@ export default function Admin() {
         .from("tours")
         
         .select(
-            "id, slug, title, short_description, description, duration, duration_label, location, difficulty, price, currency, main_image, highlights, itinerary, included_services, excluded_services, status"
+            "id, slug, title, short_description, description, duration, duration_label, location, difficulty, price, currency, main_image, detail_image, show_on_home, highlights, itinerary, included_services, excluded_services, status"
                 )
 
         .order("duration", { ascending: true });
@@ -118,15 +132,17 @@ export default function Admin() {
 
       setTours((data ?? []) as Tour[]);
     } catch (error) {
-      setPageError(
-        error instanceof Error
-          ? error.message
-          : "Не удалось загрузить туры."
-      );
+      setPageError(`Не удалось загрузить туры: ${errorMessage(error, "проверь подключение к Supabase и права доступа.")}`);
     } finally {
       setLoadingTours(false);
     }
   }, []);
+
+  const toggleFeatured = async (tour: Tour) => {
+    const { error } = await supabase.from("tours").update({ show_on_home: !tour.show_on_home }).eq("id", tour.id);
+    if (error) setPageError(`Не удалось обновить сезонные туры: ${error.message}`);
+    else await loadTours();
+  };
 
   useEffect(() => {
     void checkAccess();
@@ -258,6 +274,30 @@ export default function Admin() {
       </header>
 
       <div className="max-w-7xl mx-auto px-5 sm:px-8 py-10">
+        <nav className="mb-8 flex flex-wrap gap-2" aria-label="Разделы админ-панели">
+          {([
+            ["tours", "Все туры"], ["seasonal", "Сезонные на главной"], ["gallery", "Галерея"], ["reviews", "Отзывы"],
+          ] as [AdminSection, string][]).map(([key, label]) => (
+            <button key={key} type="button" onClick={() => setSection(key)} className={`rounded-full px-5 py-3 text-sm font-semibold transition ${section === key ? "bg-[#4A5C23] text-white" : "border border-gray-200 bg-white text-gray-700 hover:bg-gray-50"}`}>
+              {label}
+            </button>
+          ))}
+        </nav>
+
+        {section === "gallery" || section === "reviews" ? <AdminSiteContent section={section} /> : section === "seasonal" ? (
+          <section className="rounded-3xl border border-gray-100 bg-white p-6 shadow-sm">
+            <h2 className="text-2xl font-bold text-[#17200f]">Сезонные туры на главной</h2>
+            <p className="mb-6 mt-2 text-sm text-gray-600">Выберите опубликованные туры для блока Explore Kyrgyzstan with Expert-Planned Journeys. Фото карточки и название настраиваются в редакторе тура.</p>
+            <div className="grid gap-3 md:grid-cols-2">
+              {tours.map((tour) => <label key={tour.id} className="flex items-center gap-4 rounded-2xl border border-gray-100 p-4">
+                <input type="checkbox" checked={Boolean(tour.show_on_home)} disabled={tour.status !== "published"} onChange={() => void toggleFeatured(tour)} className="h-4 w-4 accent-[#4A5C23]" />
+                {tour.main_image && <img src={tour.main_image} alt="" className="h-16 w-20 rounded-lg object-cover" />}
+                <span><span className="block font-semibold">{tour.title}</span><span className="text-sm text-gray-500">{tour.duration_label || `${tour.duration} дней`} · {tour.status === "published" ? "Опубликован" : "Сначала опубликуйте тур"}</span></span>
+              </label>)}
+            </div>
+            {!tours.length && <p className="text-sm text-gray-500">Сначала создайте туры.</p>}
+          </section>
+        ) : <>
         <div className="flex flex-wrap items-end justify-between gap-4 mb-8">
           <div>
             <p className="text-sm text-gray-500 mb-2">
@@ -468,6 +508,7 @@ onClick={() => {
             На главную
           </Link>
         </div>
+        </>}
       </div>
 
 {editorOpen && (

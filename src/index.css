@@ -303,72 +303,18 @@ nav.kt-navigation-scrolled {
   object-fit: cover;
 }
 
-/* =========================================
-   LIGHT PHOTO BACKGROUNDS FOR CONTENT SECTIONS
-   ========================================= */
-
-/*
-  These background rules apply only to sections with
-  the matching IDs. They do not create a global
-  background image behind the whole website.
-*/
-
+/* Old template photo backgrounds were removed; each photo now has one source. */
 #about,
 #itineraries,
 #gallery,
 #testimonials {
-  position: relative;
-  isolation: isolate;
-  color: #283128;
-  background-size: cover !important;
-  background-position: center !important;
-  background-repeat: no-repeat !important;
-  background-attachment: scroll !important;
+  background-image: none !important;
 }
 
-/* Soft transitions are provided by the pale overlays */
-#about {
-  background-image:
-    linear-gradient(
-      180deg,
-      rgba(245, 245, 239, 0.82) 0%,
-      rgba(245, 245, 239, 0.74) 50%,
-      rgba(245, 245, 239, 0.92) 100%
-    ),
-    url("./assets/images/slide-1.webp") !important;
-}
-
-#itineraries {
-  background-image:
-    linear-gradient(
-      180deg,
-      rgba(245, 245, 239, 0.82) 0%,
-      rgba(245, 245, 239, 0.74) 50%,
-      rgba(245, 245, 239, 0.92) 100%
-    ),
-    url("./assets/images/slide-2.webp") !important;
-}
-
-#gallery {
-  background-image:
-    linear-gradient(
-      180deg,
-      rgba(245, 245, 239, 0.82) 0%,
-      rgba(245, 245, 239, 0.72) 50%,
-      rgba(245, 245, 239, 0.92) 100%
-    ),
-    url("./assets/images/slide-3.webp") !important;
-}
-
-#testimonials {
-  background-image:
-    linear-gradient(
-      180deg,
-      rgba(245, 245, 239, 0.84) 0%,
-      rgba(245, 245, 239, 0.74) 50%,
-      rgba(245, 245, 239, 0.93) 100%
-    ),
-    url("./assets/images/slide-1.webp") !important;
+.kt-page-hero h1,
+.kt-page-hero p,
+.kt-page-hero span {
+  color: #fff !important;
 }
 
 /* Remove old dark blend overlays */
@@ -377,20 +323,9 @@ nav.kt-navigation-scrolled {
   display: none !important;
 }
 
-/* Content section typography */
-#about h1,
-#about h2,
-#about h3,
-#itineraries h1,
-#itineraries h2,
-#itineraries h3,
-#gallery h1,
-#gallery h2,
-#gallery h3,
-#testimonials h1,
-#testimonials h2,
-#testimonials h3 {
-  color: #283128;
+#about .kt-section-blend h2,
+#about .kt-section-blend h3 {
+  color: #fff !important;
 }
 
 /* =========================================
@@ -611,12 +546,7 @@ body:has(a[href="/saved"]) {
 
 main:has(.saved-journeys),
 main:has(.saved-tours) {
-  background:
-    linear-gradient(
-      rgba(245, 245, 239, 0.84),
-      rgba(245, 245, 239, 0.90)
-    ),
-    url("./assets/images/slide-1.webp") center / cover fixed;
+  background-image: none;
 }
 
 /* =========================================
@@ -624,12 +554,7 @@ main:has(.saved-tours) {
    ========================================= */
 
 main:has(form) {
-  background:
-    linear-gradient(
-      rgba(245, 245, 239, 0.86),
-      rgba(245, 245, 239, 0.91)
-    ),
-    url("./assets/images/slide-2.webp") center / cover fixed;
+  background-image: none;
 }
 
 /* Keep content readable above the background */
@@ -669,17 +594,6 @@ main:has(.saved-tours) {
   color: #fff;
 }
 
-.saved-page-header {
-  background-image:
-    linear-gradient(rgba(25, 35, 27, 0.38), rgba(25, 35, 27, 0.48)),
-    url("./assets/images/slide-1.webp");
-}
-
-.contact-page-header {
-  background-image:
-    linear-gradient(rgba(25, 35, 27, 0.38), rgba(25, 35, 27, 0.48)),
-    url("./assets/images/slide-2.webp");
-}
 
 .saved-page-header h1,
 .saved-page-header p,

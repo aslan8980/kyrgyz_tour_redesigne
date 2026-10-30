@@ -10,6 +10,8 @@ import {
   MessageCircle,
 } from "lucide-react";
 import Navigation from "../components/Navigation";
+import PageHero from "../components/PageHero";
+import ContactHero from "../assets/images/site/hero/hero-contact.jpg";
 import { supabase } from "../lib/supabase";
 
 type TourOption = {
@@ -170,20 +172,15 @@ const Contact = () => {
     <div className="min-h-screen bg-white">
       <Navigation />
 
-      <section className="px-4 pb-12 pt-36 md:px-8 md:pt-40">
-        <div className="mx-auto max-w-4xl text-center">
-          <div className="inline-flex items-center gap-2 rounded-full bg-[#c9cebd] px-4 py-2">
-            <span className="h-2 w-2 rounded-full bg-[#4a5c23]" />
-            <span className="text-sm font-medium">Plan Your Trip</span>
-          </div>
-          <h1 className="mt-5 text-4xl font-bold text-gray-900 md:text-6xl">Request a Tour</h1>
-          <p className="mx-auto mt-6 max-w-2xl text-lg leading-relaxed text-gray-600">
-            Choose your tour, preferred date and the easiest way for us to contact you.
-          </p>
-        </div>
-      </section>
+      <PageHero
+        image={ContactHero}
+        imageAlt="Mountain landscape in Kyrgyzstan"
+        eyebrow="Plan Your Trip"
+        title="Request a Tour"
+        description="Choose your tour, preferred date and the easiest way for us to contact you."
+      />
 
-      <main className="mx-auto max-w-7xl px-4 pb-24 md:px-8">
+      <main className="mx-auto max-w-7xl px-4 pt-10 pb-28 md:px-8 md:pt-14 md:pb-32">
         <div className="grid grid-cols-1 gap-10 lg:grid-cols-[0.9fr_1.1fr] lg:gap-12">
           <div className="rounded-2xl bg-[#f7f8f5] p-8 md:p-10">
             <h2 className="mb-8 text-2xl font-bold text-gray-900">Contact Information</h2>

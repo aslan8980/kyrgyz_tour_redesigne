@@ -1,7 +1,5 @@
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, type MutableRefObject } from "react";
 import { Link } from "react-router-dom";
-import L from "leaflet";
-import "leaflet/dist/leaflet.css";
 
 import {
   Activity,
@@ -19,16 +17,6 @@ import {
   Utensils,
   X,
 } from "lucide-react";
-
-import {
-  CircleMarker,
-  MapContainer,
-  Marker,
-  Popup,
-  TileLayer,
-  ZoomControl,
-  useMap,
-} from "react-leaflet";
 
 import Logo from "../assets/images/logo1.webp";
 
@@ -269,170 +257,283 @@ const categoryLabels: Record<
   activity: "Activity",
 };
 
-const createMarkerIcon = (
-  category: Exclude<Category, "all">
-) => {
-  const color = categoryColors[category];
-
-  return L.divIcon({
-    className: "kyrgyz-map-marker",
-    html: `
-      <div
-        style="
-          width:34px;
-          height:34px;
-          background:${color};
-          border:3px solid white;
-          border-radius:50% 50% 50% 0;
-          transform:rotate(-45deg);
-          box-shadow:0 4px 12px rgba(0,0,0,0.25);
-          display:flex;
-          align-items:center;
-          justify-content:center;
-        "
-      >
-        <div
-          style="
-            width:8px;
-            height:8px;
-            background:white;
-            border-radius:50%;
-            transform:rotate(45deg);
-          "
-        ></div>
-      </div>
-    `,
-    iconSize: [34, 34],
-    iconAnchor: [17, 34],
-    popupAnchor: [0, -34],
-  });
+type Coordinates = { lat: number; lng: number };
+type BoundsLiteral = { south: number; west: number; north: number; east: number };
+type GoogleMapApi = {
+  fitBounds: (bounds: BoundsLiteral, padding?: number) => void;
+  panTo: (location: Coordinates) => void;
+  setZoom: (zoom: number) => void;
+};
+type GoogleMarkerApi = HTMLElement & { map: GoogleMapApi | null };
+type GoogleInfoWindowApi = {
+  setContent: (content: HTMLElement) => void;
+  open: (options: { map: GoogleMapApi; anchor: GoogleMarkerApi }) => void;
+  close: () => void;
+};
+type GoogleMapsNamespace = {
+  Map: new (container: HTMLElement, options: Record<string, unknown>) => GoogleMapApi;
+  InfoWindow: new (options?: { maxWidth?: number }) => GoogleInfoWindowApi;
+  marker: {
+    AdvancedMarkerElement: new (options: { map: GoogleMapApi; position: Coordinates; title: string }) => GoogleMarkerApi;
+    PinElement: new (options: { background: string; borderColor: string; glyphColor: string }) => { element: HTMLElement };
+  };
+};
+type GoogleMapsApi = GoogleMapsNamespace;
+type GoogleWindow = Window & {
+  google?: { maps?: Partial<GoogleMapsNamespace> };
+  kyrgyzToursGoogleMapsReady?: () => void;
+  gm_authFailure?: () => void;
 };
 
-const FocusSelectedPlace = ({
-  place,
+let googleMapsLoading: Promise<GoogleMapsApi> | null = null;
+
+function loadGoogleMaps(apiKey: string): Promise<GoogleMapsApi> {
+  const current = (window as GoogleWindow).google?.maps;
+  if (current?.Map && current.InfoWindow && current.marker?.AdvancedMarkerElement && current.marker.PinElement) {
+    return Promise.resolve(current as GoogleMapsApi);
+  }
+  if (googleMapsLoading) return googleMapsLoading;
+
+  googleMapsLoading = new Promise((resolve, reject) => {
+    const existingScript = document.getElementById("google-maps-js");
+    // A previously injected API script may have loaded without the required libraries.
+    // Replace it so the callback and requested libraries are applied consistently.
+    existingScript?.remove();
+    const script = document.createElement("script");
+    script.id = "google-maps-js";
+    script.async = true;
+    const googleWindow = window as GoogleWindow;
+    googleWindow.kyrgyzToursGoogleMapsReady = () => {
+      const maps = (window as GoogleWindow).google?.maps;
+      if (maps?.Map && maps.InfoWindow && maps.marker?.AdvancedMarkerElement && maps.marker.PinElement) {
+        resolve(maps as GoogleMapsApi);
+      } else {
+        reject(new Error("Google Maps loaded without the map or marker libraries. Check that Maps JavaScript API is enabled for this key."));
+      }
+    };
+    script.onerror = () => reject(new Error("Google Maps could not load. Check that Maps JavaScript API is enabled, billing is active, and localhost is allowed in the key's website restrictions."));
+    script.src = `https://maps.googleapis.com/maps/api/js?key=${encodeURIComponent(apiKey)}&libraries=maps,marker&callback=kyrgyzToursGoogleMapsReady&v=weekly`;
+    document.head.appendChild(script);
+  }).catch((error: unknown) => {
+    googleMapsLoading = null;
+    throw error;
+  });
+
+  return googleMapsLoading;
+}
+
+const GoogleMapCanvas = ({
+  places,
+  selectedPlace,
+  userLocation,
+  onSelectPlace,
+  mapRef,
+  setMapError,
 }: {
-  place: Place | null;
+  places: Place[];
+  selectedPlace: Place | null;
+  userLocation: [number, number] | null;
+  onSelectPlace: (place: Place) => void;
+  mapRef: MutableRefObject<GoogleMapApi | null>;
+  setMapError: (message: string) => void;
 }) => {
-  const map = useMap();
+  const containerRef = useRef<HTMLDivElement>(null);
+  const infoWindowRef = useRef<GoogleInfoWindowApi | null>(null);
+  const markersRef = useRef<Map<number, GoogleMarkerApi>>(new globalThis.Map());
+  const userMarkerRef = useRef<GoogleMarkerApi | null>(null);
+  const [mapReady, setMapReady] = useState(false);
 
   useEffect(() => {
-    if (!place) return;
+    const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
+    if (!apiKey) {
+      setMapError("Google Maps API key is missing. Add VITE_GOOGLE_MAPS_API_KEY to .env.local and restart the dev server.");
+      return;
+    }
 
-    map.flyTo(
-      [place.lat, place.lng],
-      place.category === "attraction" ? 10 : 13,
-      {
-        duration: 0.8,
+    let active = true;
+    const googleWindow = window as GoogleWindow;
+    const handleGoogleAuthFailure = () => {
+      if (active) {
+        setMapError("Google rejected this API key. In Google Cloud, enable Maps JavaScript API, check billing, and allow this site's HTTP referrer and API in the key restrictions.");
       }
-    );
-  }, [place, map]);
+    };
+    googleWindow.gm_authFailure = handleGoogleAuthFailure;
+    void loadGoogleMaps(apiKey).then(async (googleMaps) => {
+      if (!active || !containerRef.current) return;
+      const map = new googleMaps.Map(containerRef.current, {
+        center: { lat: 41.8, lng: 74.6 },
+        zoom: 7,
+        minZoom: 6,
+        maxZoom: 18,
+        mapId: import.meta.env.VITE_GOOGLE_MAP_ID || "DEMO_MAP_ID",
+        fullscreenControl: false,
+        mapTypeControl: false,
+        streetViewControl: false,
+        zoomControl: true,
+        zoomControlOptions: { position: 9 },
+      });
+      mapRef.current = map;
+      infoWindowRef.current = new googleMaps.InfoWindow({ maxWidth: 300 });
+      setMapError("");
+      setMapReady(true);
+    }).catch((error: unknown) => {
+      if (active) setMapError(error instanceof Error ? error.message : "Google Maps could not be loaded.");
+    });
 
-  return null;
+    return () => {
+      active = false;
+      if (googleWindow.gm_authFailure === handleGoogleAuthFailure) delete googleWindow.gm_authFailure;
+      markersRef.current.forEach((marker) => { marker.map = null; });
+      markersRef.current.clear();
+      if (userMarkerRef.current) userMarkerRef.current.map = null;
+      infoWindowRef.current?.close();
+      mapRef.current = null;
+    };
+  }, [mapRef, setMapError]);
+
+  useEffect(() => {
+    if (!mapReady || !mapRef.current) return;
+    let active = true;
+    void loadGoogleMaps(import.meta.env.VITE_GOOGLE_MAPS_API_KEY || "").then(async (googleMaps) => {
+      if (!active || !mapRef.current) return;
+
+      markersRef.current.forEach((marker) => { marker.map = null; });
+      markersRef.current.clear();
+      infoWindowRef.current?.close();
+
+      places.forEach((place) => {
+        const marker = new googleMaps.marker.AdvancedMarkerElement({
+          map: mapRef.current!,
+          position: { lat: place.lat, lng: place.lng },
+          title: place.name,
+        });
+        const pin = new googleMaps.marker.PinElement({
+          background: categoryColors[place.category],
+          borderColor: "#ffffff",
+          glyphColor: "#ffffff",
+        });
+        marker.append(pin.element);
+        marker.addEventListener("gmp-click", () => {
+          onSelectPlace(place);
+          const content = document.createElement("div");
+          content.style.maxWidth = "250px";
+          const category = document.createElement("p");
+          category.textContent = categoryLabels[place.category];
+          category.style.color = categoryColors[place.category];
+          category.style.fontSize = "12px";
+          const title = document.createElement("h3");
+          title.textContent = place.name;
+          title.style.fontWeight = "700";
+          title.style.margin = "4px 0";
+          const region = document.createElement("p");
+          region.textContent = place.region;
+          region.style.color = "#6b7280";
+          region.style.fontSize = "12px";
+          const description = document.createElement("p");
+          description.textContent = place.description;
+          description.style.marginTop = "8px";
+          content.append(category, title, region, description);
+          infoWindowRef.current?.setContent(content);
+          infoWindowRef.current?.open({ map: mapRef.current!, anchor: marker });
+        });
+        markersRef.current.set(place.id, marker);
+      });
+    }).catch((error: unknown) => {
+      if (active) setMapError(error instanceof Error ? error.message : "Could not display map markers.");
+    });
+    return () => { active = false; };
+  }, [mapReady, mapRef, onSelectPlace, places, setMapError]);
+
+  useEffect(() => {
+    if (!mapReady || !mapRef.current || !selectedPlace) return;
+    mapRef.current.panTo({ lat: selectedPlace.lat, lng: selectedPlace.lng });
+    mapRef.current.setZoom(selectedPlace.category === "attraction" ? 10 : 13);
+  }, [mapReady, mapRef, selectedPlace]);
+
+  useEffect(() => {
+    if (!mapReady || !mapRef.current) return;
+    if (!userLocation) {
+      if (userMarkerRef.current) userMarkerRef.current.map = null;
+      userMarkerRef.current = null;
+      return;
+    }
+    let active = true;
+    void loadGoogleMaps(import.meta.env.VITE_GOOGLE_MAPS_API_KEY || "").then(async (googleMaps) => {
+      if (!active || !mapRef.current) return;
+      if (userMarkerRef.current) userMarkerRef.current.map = null;
+      const marker = new googleMaps.marker.AdvancedMarkerElement({
+        map: mapRef.current,
+        position: { lat: userLocation[0], lng: userLocation[1] },
+        title: "Your location",
+      });
+      const pin = new googleMaps.marker.PinElement({ background: "#85BC03", borderColor: "#ffffff", glyphColor: "#ffffff" });
+      marker.append(pin.element);
+      userMarkerRef.current = marker;
+    });
+    return () => { active = false; };
+  }, [mapReady, mapRef, userLocation]);
+
+  return <div ref={containerRef} className="absolute inset-0 h-full w-full" aria-label="Google map of Kyrgyzstan" />;
 };
 
 const MapTools = ({
   visiblePlaces,
   onLocation,
   setLocationMessage,
+  mapRef,
 }: {
   visiblePlaces: Place[];
   onLocation: (location: [number, number]) => void;
   setLocationMessage: (message: string) => void;
+  mapRef: MutableRefObject<GoogleMapApi | null>;
 }) => {
-  const map = useMap();
-
   const fitPlaces = () => {
-    if (!visiblePlaces.length) return;
-
-    const bounds = L.latLngBounds(
-      visiblePlaces.map((place) => [
-        place.lat,
-        place.lng,
-      ])
-    );
-
-    map.fitBounds(bounds, {
-      padding: [50, 50],
-      maxZoom: 10,
-    });
+    const map = mapRef.current;
+    if (!map || !visiblePlaces.length) return;
+    if (visiblePlaces.length === 1) {
+      const place = visiblePlaces[0];
+      map.panTo({ lat: place.lat, lng: place.lng });
+      map.setZoom(12);
+      return;
+    }
+    const lats = visiblePlaces.map((place) => place.lat);
+    const lngs = visiblePlaces.map((place) => place.lng);
+    map.fitBounds({ south: Math.min(...lats), west: Math.min(...lngs), north: Math.max(...lats), east: Math.max(...lngs) }, 50);
   };
 
   const locateUser = () => {
     if (!navigator.geolocation) {
-      setLocationMessage(
-        "Geolocation is not supported by your browser."
-      );
+      setLocationMessage("Geolocation is not supported by your browser.");
       return;
     }
-
-    navigator.geolocation.getCurrentPosition(
-      (position) => {
-        const location: [number, number] = [
-          position.coords.latitude,
-          position.coords.longitude,
-        ];
-
-        onLocation(location);
-
-        map.flyTo(location, 14, {
-          duration: 1,
-        });
-
-        setLocationMessage("");
-      },
-      () => {
-        setLocationMessage(
-          "We couldn't access your location. Please allow location access in your browser."
-        );
-      },
-      {
-        enableHighAccuracy: true,
-        timeout: 10000,
-      }
-    );
+    navigator.geolocation.getCurrentPosition((position) => {
+      const location: [number, number] = [position.coords.latitude, position.coords.longitude];
+      onLocation(location);
+      mapRef.current?.panTo({ lat: location[0], lng: location[1] });
+      mapRef.current?.setZoom(14);
+      setLocationMessage("");
+    }, () => {
+      setLocationMessage("We couldn't access your location. Please allow location access in your browser.");
+    }, { enableHighAccuracy: true, timeout: 10000 });
   };
 
   const toggleFullscreen = () => {
-    if (!document.fullscreenElement) {
-      document.documentElement.requestFullscreen?.();
-    } else {
-      document.exitFullscreen?.();
-    }
+    if (!document.fullscreenElement) document.documentElement.requestFullscreen?.();
+    else document.exitFullscreen?.();
   };
 
   return (
-    <div className="absolute top-4 right-4 z-[1000] flex flex-col gap-2">
-      <button
-        onClick={fitPlaces}
-        className="w-11 h-11 bg-white rounded-xl shadow-lg flex items-center justify-center text-gray-700 hover:text-[#4A5C23] transition-colors"
-        title="Show all places"
-        aria-label="Show all places"
-      >
-        <Compass className="w-5 h-5" />
-      </button>
-
-      <button
-        onClick={locateUser}
-        className="w-11 h-11 bg-white rounded-xl shadow-lg flex items-center justify-center text-gray-700 hover:text-[#4A5C23] transition-colors"
-        title="My location"
-        aria-label="My location"
-      >
-        <LocateFixed className="w-5 h-5" />
-      </button>
-
-      <button
-        onClick={toggleFullscreen}
-        className="w-11 h-11 bg-white rounded-xl shadow-lg flex items-center justify-center text-gray-700 hover:text-[#4A5C23] transition-colors"
-        title="Fullscreen"
-        aria-label="Fullscreen"
-      >
-        <ArrowUpRight className="w-5 h-5" />
-      </button>
+    <div className="absolute right-4 top-4 z-[1000] flex flex-col gap-2">
+      <button onClick={fitPlaces} className="flex h-11 w-11 items-center justify-center rounded-xl bg-white text-gray-700 shadow-lg transition-colors hover:text-[#4A5C23]" title="Show all places" aria-label="Show all places"><Compass className="h-5 w-5" /></button>
+      <button onClick={locateUser} className="flex h-11 w-11 items-center justify-center rounded-xl bg-white text-gray-700 shadow-lg transition-colors hover:text-[#4A5C23]" title="My location" aria-label="My location"><LocateFixed className="h-5 w-5" /></button>
+      <button onClick={toggleFullscreen} className="flex h-11 w-11 items-center justify-center rounded-xl bg-white text-gray-700 shadow-lg transition-colors hover:text-[#4A5C23]" title="Fullscreen" aria-label="Fullscreen"><ArrowUpRight className="h-5 w-5" /></button>
     </div>
   );
 };
 
 const Map = () => {
+  const mapRef = useRef<GoogleMapApi | null>(null);
+  const [mapError, setMapError] = useState("");
   const [activeCategory, setActiveCategory] =
     useState<Category>("all");
 
@@ -452,6 +553,10 @@ const Map = () => {
 
   const [sidebarOpen, setSidebarOpen] =
     useState(false);
+
+  const selectPlace = useCallback((place: Place) => {
+    setSelectedPlace(place);
+  }, []);
 
   const filteredPlaces = useMemo(() => {
     const normalizedSearch =
@@ -548,132 +653,25 @@ const Map = () => {
       {/* MAP */}
 
       <main className="relative h-[calc(100vh-64px)]">
-        <MapContainer
-          center={[41.8, 74.6]}
-          zoom={7}
-          minZoom={6}
-          maxZoom={18}
-          scrollWheelZoom={true}
-          zoomControl={false}
-          className="w-full h-full z-0"
-        >
-          <TileLayer
-            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-            url="https://tile.openstreetmap.org/{z}/{x}/{y}.png"
-          />
-
-          <ZoomControl position="bottomright" />
-
-          <FocusSelectedPlace
-            place={selectedPlace}
-          />
-
-          <MapTools
-            visiblePlaces={filteredPlaces}
-            onLocation={setUserLocation}
-            setLocationMessage={setLocationMessage}
-          />
-
-          {userLocation && (
-            <CircleMarker
-              center={userLocation}
-              radius={9}
-              pathOptions={{
-                color: "#4A5C23",
-                fillColor: "#85BC03",
-                fillOpacity: 0.9,
-                weight: 3,
-              }}
-            />
-          )}
-
-          {filteredPlaces.map((place) => (
-            <Marker
-              key={place.id}
-              position={[
-                place.lat,
-                place.lng,
-              ]}
-              icon={createMarkerIcon(
-                place.category
-              )}
-              eventHandlers={{
-                click: () => {
-                  setSelectedPlace(place);
-                },
-              }}
-            >
-              <Popup maxWidth={300}>
-                <div className="min-w-[220px]">
-                  <div className="flex items-start justify-between gap-3">
-                    <div>
-                      <span
-                        className="inline-block text-xs font-medium px-2 py-1 rounded-full mb-2"
-                        style={{
-                          backgroundColor:
-                            `${categoryColors[place.category]}18`,
-                          color:
-                            categoryColors[
-                              place.category
-                            ],
-                        }}
-                      >
-                        {
-                          categoryLabels[
-                            place.category
-                          ]
-                        }
-                      </span>
-
-                      <h3 className="font-semibold text-gray-900 text-base">
-                        {place.name}
-                      </h3>
-
-                      <p className="text-xs text-gray-500 mt-1">
-                        {place.region}
-                      </p>
-                    </div>
-                  </div>
-
-                  {place.rating && (
-                    <div className="mt-2 text-sm text-gray-600">
-                      ★ {place.rating}
-                    </div>
-                  )}
-
-                  <p className="text-sm text-gray-600 leading-relaxed mt-3">
-                    {place.description}
-                  </p>
-
-                  {place.dietary &&
-                    place.dietary.length > 0 && (
-                      <div className="flex flex-wrap gap-1 mt-3">
-                        {place.dietary.map(
-                          (diet) => (
-                            <span
-                              key={diet}
-                              className="text-xs bg-green-50 text-green-700 px-2 py-1 rounded-full"
-                            >
-                              {diet}
-                            </span>
-                          )
-                        )}
-                      </div>
-                    )}
-
-                  <button
-                    onClick={() =>
-                      setSelectedPlace(place)
-                    }
-                    className="w-full mt-4 bg-[#4A5C23] hover:bg-[#85BC03] text-white text-sm font-medium py-2.5 rounded-lg transition-colors"
-                  >
-                    View details
-                  </button>
-                </div>
-              </Popup>
-            </Marker>
-          ))}
-        </MapContainer>
+        <GoogleMapCanvas
+          places={filteredPlaces}
+          selectedPlace={selectedPlace}
+          userLocation={userLocation}
+          onSelectPlace={selectPlace}
+          mapRef={mapRef}
+          setMapError={setMapError}
+        />
+        {mapError && (
+          <div role="alert" className="absolute inset-x-4 top-4 z-[1050] mx-auto max-w-2xl rounded-xl border border-red-200 bg-white p-4 text-sm text-red-700 shadow-lg lg:left-[390px]">
+            {mapError}
+          </div>
+        )}
+        <MapTools
+          visiblePlaces={filteredPlaces}
+          onLocation={setUserLocation}
+          setLocationMessage={setLocationMessage}
+          mapRef={mapRef}
+        />
 
         {/* MOBILE FILTER BUTTON */}
 

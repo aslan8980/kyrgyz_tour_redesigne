@@ -29,12 +29,18 @@ import {
 } from "lucide-react";
 
 import Navigation from "../components/Navigation";
+import PageHero from "../components/PageHero";
 import { supabase } from "../lib/supabase";
+import { usePublicTestimonials } from "../hooks/usePublicTestimonials";
 
 import ThreeDays from "../assets/images/3-days.webp";
 import FourDays from "../assets/images/4-days.webp";
 import FiveDays from "../assets/images/5-days.webp";
 import FourteenDays from "../assets/images/14-days.webp";
+import DetailHero3Days from "../assets/images/site/hero/tour-detail-3-days.jpg";
+import DetailHero4Days from "../assets/images/site/hero/tour-detail-4-days.jpg";
+import DetailHero5Days from "../assets/images/site/hero/tour-detail-5-days.jpg";
+import DetailHero14Days from "../assets/images/site/hero/tour-detail-14-days.jpg";
 
 type Currency = "USD" | "EUR" | "KGS";
 
@@ -57,6 +63,7 @@ type Tour = {
   price: number;
   currency: string;
   image: string;
+  detailImage: string | null;
   gallery: string[];
   highlights: string[];
   days: TourDay[];
@@ -77,6 +84,7 @@ type DatabaseTour = {
   price: number | string;
   currency: string;
   main_image: string | null;
+  detail_image: string | null;
   gallery: unknown;
   highlights: unknown;
   itinerary: unknown;
@@ -89,6 +97,13 @@ const LOCAL_IMAGES: Record<string, string> = {
   "4-days": FourDays,
   "5-days": FiveDays,
   "14-days": FourteenDays,
+};
+
+const TOUR_DETAIL_HERO_IMAGES: Record<string, string> = {
+  "3-days": DetailHero3Days,
+  "4-days": DetailHero4Days,
+  "5-days": DetailHero5Days,
+  "14-days": DetailHero14Days,
 };
 
 const FAVORITES_KEY = "kyrgyz-tours-favorites";
@@ -104,27 +119,6 @@ const CURRENCY_SYMBOLS: Record<Currency, string> = {
   EUR: "€",
   KGS: "сом",
 };
-
-const DEMO_REVIEWS = [
-  {
-    name: "Emily",
-    country: "United Kingdom",
-    date: "Example review",
-    rating: 5,
-    title: "An unforgettable mountain adventure",
-    text: "This is fictional placeholder feedback for layout preview. Replace it with a genuine customer review before publishing.",
-    initials: "E",
-  },
-  {
-    name: "Marco",
-    country: "Italy",
-    date: "Example review",
-    rating: 5,
-    title: "Beautiful places and a great experience",
-    text: "This is fictional placeholder feedback for layout preview. Replace it with a genuine customer review before publishing.",
-    initials: "M",
-  },
-];
 
 const MONTH_NAMES = [
   "January",
@@ -190,7 +184,8 @@ function mapTour(row: DatabaseTour): Tour {
     price: Number(row.price) || 0,
     currency: (row.currency || "EUR").toUpperCase(),
     image: row.main_image || fallbackImage,
-    gallery: gallery.length ? gallery : [row.main_image || fallbackImage],
+    detailImage: row.detail_image,
+    gallery: gallery.length ? gallery : [row.detail_image || row.main_image || fallbackImage],
     highlights: stringArray(row.highlights),
     days: parseItinerary(row.itinerary),
     included: stringArray(row.included_services),
@@ -234,6 +229,10 @@ function isFutureOrToday(date: Date): boolean {
 }
 
 const TourDetails = () => {
+  const reviews = usePublicTestimonials();
+  const averageRating = reviews.length
+    ? (reviews.reduce((sum, review) => sum + review.rating, 0) / reviews.length).toFixed(1)
+    : "—";
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
 
@@ -264,7 +263,7 @@ const TourDetails = () => {
       const { data, error } = await supabase
         .from("tours")
         .select(
-          "id, slug, title, short_description, description, duration, duration_label, location, difficulty, price, currency, main_image, gallery, highlights, itinerary, included_services, excluded_services"
+          "id, slug, title, short_description, description, duration, duration_label, location, difficulty, price, currency, main_image, detail_image, gallery, highlights, itinerary, included_services, excluded_services"
         )
         .eq("status", "published")
         .order("duration", { ascending: true });
@@ -301,7 +300,7 @@ const TourDetails = () => {
 
   const galleryImages = useMemo(() => {
     if (!tour) return [];
-    return Array.from(new Set([tour.image, ...tour.gallery].filter(Boolean)));
+    return Array.from(new Set(tour.gallery.filter((image) => image && image !== tour.image)));
   }, [tour]);
 
   const searchResults = useMemo(() => {
@@ -450,6 +449,14 @@ const TourDetails = () => {
     <div className="min-h-screen bg-white text-gray-900">
       <Navigation />
 
+      <PageHero
+        image={tour.detailImage || TOUR_DETAIL_HERO_IMAGES[tour.slug] || tour.image}
+        imageAlt={tour.title}
+        eyebrow={`${tour.durationLabel} · ${tour.location}`}
+        title={tour.title}
+        description={tour.shortDescription}
+      />
+
       <div className="sticky top-[88px] z-30 border-b border-gray-100 bg-white/95 backdrop-blur">
         <div className="mx-auto flex max-w-7xl items-center gap-3 px-4 py-3 md:px-8">
           <Link
@@ -592,13 +599,6 @@ const TourDetails = () => {
                   )}
                 </button>
               ))}
-              {galleryImages.length === 0 && (
-                <img
-                  src={tour.image}
-                  alt={tour.title}
-                  className="col-span-2 h-72 w-full rounded-2xl object-cover sm:h-[390px]"
-                />
-              )}
             </div>
 
             <div className="mt-7 flex flex-wrap gap-3">
@@ -855,25 +855,23 @@ const TourDetails = () => {
               </h2>
               <div className="mt-6 flex items-center gap-5 rounded-3xl bg-[#f7f8f4] p-6">
                 <div>
-                  <div className="flex gap-1">
-                    {Array.from({ length: 5 }, (_, index) => (
+                  <div className="flex gap-1" aria-label={`${averageRating} out of 5 stars`}>
+                    {Array.from({ length: Math.round(Number(averageRating) || 0) }, (_, index) => (
                       <Star key={index} size={18} className="fill-[#4A5C23] text-[#4A5C23]" />
                     ))}
                   </div>
                 </div>
                 <div>
-                  <p className="font-semibold text-[#17200f]">Sample traveler feedback</p>
-                  <p className="mt-1 text-sm leading-6 text-gray-500">
-                    These are fictional layout examples, not verified customer reviews.
-                  </p>
+                  <p className="font-semibold text-[#17200f]">{averageRating} / 5</p>
+                  <p className="mt-1 text-sm leading-6 text-gray-500">{reviews.length} traveler {reviews.length === 1 ? "review" : "reviews"}</p>
                 </div>
               </div>
               <div className="mt-7 space-y-7">
-                {DEMO_REVIEWS.map((review) => (
-                  <article key={review.name} className="border-b border-gray-100 pb-7 last:border-0">
+                {reviews.map((review) => (
+                  <article key={review.id} className="border-b border-gray-100 pb-7 last:border-0">
                     <div className="flex items-start gap-4">
                       <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-[#edf0e6] text-lg font-bold text-[#4A5C23]">
-                        {review.initials}
+                        {review.name.slice(0, 1).toUpperCase()}
                       </div>
                       <div className="min-w-0 flex-1">
                         <div className="flex flex-wrap items-center justify-between gap-2">
@@ -881,7 +879,6 @@ const TourDetails = () => {
                             <h3 className="font-semibold text-[#17200f]">{review.name}</h3>
                             <p className="mt-1 text-sm text-gray-500">{review.country}</p>
                           </div>
-                          <span className="text-xs text-gray-400">{review.date}</span>
                         </div>
                         <div className="mt-3 flex gap-1">
                           {Array.from({ length: 5 }, (_, index) => (
@@ -892,12 +889,13 @@ const TourDetails = () => {
                             />
                           ))}
                         </div>
-                        <h4 className="mt-3 font-semibold text-[#17200f]">{review.title}</h4>
+                        {review.title && <h4 className="mt-3 font-semibold text-[#17200f]">{review.title}</h4>}
                         <p className="mt-2 leading-7 text-gray-600">{review.text}</p>
                       </div>
                     </div>
                   </article>
                 ))}
+                {!reviews.length && <p className="text-gray-500">No traveler reviews yet.</p>}
               </div>
             </section>
 
