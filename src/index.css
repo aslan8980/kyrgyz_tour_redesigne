@@ -549,6 +549,37 @@ main:has(.saved-tours) {
   background-image: none;
 }
 
+/* Numbered itinerary markers on tour detail maps */
+.tour-route-marker-wrap {
+  border: 0;
+  background: transparent;
+}
+
+.tour-route-marker {
+  display: flex;
+  width: 34px;
+  height: 34px;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid #fff;
+  border-radius: 999px;
+  background: #8c9872;
+  color: #fff;
+  box-shadow: 0 3px 12px rgb(23 32 15 / 25%);
+  font-size: 13px;
+  font-weight: 700;
+  transition: transform 160ms ease, background-color 160ms ease, opacity 160ms ease;
+}
+
+.tour-route-marker.is-active {
+  background: #4a5c23;
+  transform: scale(1.12);
+}
+
+.tour-route-map .leaflet-control-zoom a {
+  color: #26311d;
+}
+
 /* =========================================
    CONTACT — MUTED PHOTO BACKGROUND
    ========================================= */

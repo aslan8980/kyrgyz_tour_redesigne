@@ -1,10 +1,16 @@
 import { useEffect, useMemo, useState } from "react";
 import type { FormEvent } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
+import L from "leaflet";
+import "leaflet/dist/leaflet.css";
+import { MapContainer, Marker, Polyline, Popup, TileLayer, ZoomControl, useMap } from "react-leaflet";
 import {
   ArrowLeft,
   ArrowRight,
   BadgeCheck,
+  Banknote,
+  BedDouble,
+  BookOpen,
   CalendarDays,
   Camera,
   Check,
@@ -13,17 +19,24 @@ import {
   ChevronRight,
   Clock3,
   Compass,
+  Dumbbell,
+  ExternalLink,
+  Globe2,
   Heart,
+  HeartPulse,
   Languages,
   MapPin,
   MessageCircle,
   Minus,
   Mountain,
+  Shield,
   Plus,
+  Route,
   Search,
   Send,
   ShieldCheck,
   Star,
+  Sun,
   Users,
   X,
 } from "lucide-react";
@@ -49,6 +62,70 @@ type TourDay = {
   title: string;
   description: string;
 };
+
+type TourMapPlace = {
+  name: string;
+  region: string;
+  lat: number;
+  lng: number;
+  aliases: string[];
+};
+
+type DayMapPoint = TourMapPlace & { day: number };
+
+const KYRGYZ_LOCATIONS: TourMapPlace[] = [
+  { name: "Bishkek", region: "Chuy Region", lat: 42.8746, lng: 74.5698, aliases: ["bishkek", "ala-too", "ala too", "oak park", "city center", "city centre", "airport"] },
+  { name: "Ala-Archa National Park", region: "Chuy Region", lat: 42.633, lng: 74.5, aliases: ["ala-archa", "ala archa"] },
+  { name: "Burana Tower", region: "Chuy Region", lat: 42.7467, lng: 75.2556, aliases: ["burana"] },
+  { name: "Issyk-Kul Lake", region: "Issyk-Kul Region", lat: 42.45, lng: 77.3, aliases: ["issyk-kul", "issyk kul", "cholpon-ata", "cholpon ata", "balykchy", "balykchi"] },
+  { name: "Kochkor", region: "Naryn Region", lat: 42.216, lng: 75.756, aliases: ["kochkor"] },
+  { name: "Song-Kul Lake", region: "Naryn Region", lat: 41.833, lng: 75.15, aliases: ["song-kul", "song kul"] },
+  { name: "Naryn", region: "Naryn Region", lat: 41.4287, lng: 75.9911, aliases: ["naryn"] },
+  { name: "Karakol", region: "Issyk-Kul Region", lat: 42.4907, lng: 78.3936, aliases: ["karakol"] },
+  { name: "Jeti-Oguz", region: "Issyk-Kul Region", lat: 42.34, lng: 78.23, aliases: ["jeti-oguz", "jeti oguz", "jety-oguz", "jety oguz"] },
+  { name: "Osh", region: "Osh Region", lat: 40.5283, lng: 72.7985, aliases: ["osh"] },
+  { name: "Tash-Rabat", region: "Naryn Region", lat: 40.825, lng: 75.288, aliases: ["tash-rabat", "tash rabat"] },
+  { name: "Sary-Chelek", region: "Jalal-Abad Region", lat: 41.87, lng: 71.97, aliases: ["sary-chelek", "sary chelek"] },
+];
+
+const FALLBACK_ROUTES: Record<string, string[][]> = {
+  "3-days": [["Bishkek"], ["Ala-Archa National Park"], ["Bishkek"]],
+  "4-days": [["Bishkek", "Burana Tower", "Issyk-Kul Lake"], ["Issyk-Kul Lake"], ["Kochkor", "Song-Kul Lake"], ["Song-Kul Lake", "Bishkek"]],
+  "5-days": [["Bishkek", "Issyk-Kul Lake"], ["Issyk-Kul Lake", "Karakol"], ["Karakol"], ["Karakol"], ["Karakol", "Bishkek"]],
+  "14-days": [["Bishkek"], ["Bishkek", "Ala-Archa National Park"], ["Bishkek", "Issyk-Kul Lake"], ["Issyk-Kul Lake"], ["Issyk-Kul Lake", "Karakol"], ["Karakol"], ["Jeti-Oguz"], ["Karakol", "Naryn"], ["Song-Kul Lake"], ["Song-Kul Lake", "Naryn"], ["Naryn"], ["Naryn", "Bishkek"], ["Bishkek"], ["Bishkek"]],
+};
+
+function locationsForItinerary(slug: string, days: TourDay[]): DayMapPoint[] {
+  const fallback = FALLBACK_ROUTES[slug] || [];
+  return days.flatMap((day, index) => {
+    const text = `${day.title} ${day.description}`.toLowerCase();
+    const found = KYRGYZ_LOCATIONS
+      .map((place) => ({ place, firstMatch: place.aliases.reduce((first, alias) => {
+        const position = text.indexOf(alias);
+        return position >= 0 && (first < 0 || position < first) ? position : first;
+      }, -1) }))
+      .filter(({ firstMatch }) => firstMatch >= 0)
+      .sort((a, b) => a.firstMatch - b.firstMatch)
+      .map(({ place }) => place);
+    const routeNames = found.length ? found.map((place) => place.name) : fallback[index] || [];
+    return Array.from(new Set(routeNames)).flatMap((name) => {
+      const place = KYRGYZ_LOCATIONS.find((item) => item.name === name);
+      return place ? [{ ...place, day: day.day }] : [];
+    });
+  });
+}
+
+function RouteMapFocus({ points, selectedDay }: { points: DayMapPoint[]; selectedDay: number | null }) {
+  const map = useMap();
+  useEffect(() => {
+    const visible = selectedDay === null ? points : points.filter((point) => point.day === selectedDay);
+    if (!visible.length) return;
+    const bounds = L.latLngBounds(visible.map((point) => [point.lat, point.lng] as [number, number]));
+    if (bounds.getNorthEast().equals(bounds.getSouthWest())) map.setView(bounds.getCenter(), 10, { animate: true });
+    else map.fitBounds(bounds, { padding: [36, 36], maxZoom: selectedDay === null ? 8 : 11, animate: true });
+  }, [map, points, selectedDay]);
+  return null;
+}
 
 type Tour = {
   id: string;
@@ -228,6 +305,59 @@ function isFutureOrToday(date: Date): boolean {
   return date >= today;
 }
 
+type PracticalInfoTab = "money" | "safety" | "entry" | "season" | "health";
+
+const PRACTICAL_INFO: Record<PracticalInfoTab, { title: string; text: string; links: { label: string; href: string }[] }> = {
+  money: {
+    title: "Money & costs",
+    text: "The local currency is the Kyrgyzstani som (KGS). ATMs and card payments are easier to find in cities; carry some cash for rural and mountain areas. Confirm any extra costs with the tour organizer.",
+    links: [
+      { label: "National Bank of the Kyrgyz Republic", href: "https://www.nbkr.kg/index1.jsp?item=41&lang=ENG" },
+      { label: "UK travel advice: safety and cash", href: "https://www.gov.uk/foreign-travel-advice/kyrgyzstan/safety-and-security" },
+    ],
+  },
+  safety: {
+    title: "Safety",
+    text: "Keep valuables secure and use pre-arranged transport. Mountain weather can change quickly, and remote routes may have limited phone coverage or emergency access. Follow your guide and local advice; insure the activities on your itinerary.",
+    links: [{ label: "Current official safety advice", href: "https://www.gov.uk/foreign-travel-advice/kyrgyzstan/safety-and-security" }],
+  },
+  entry: {
+    title: "Entry & exit",
+    text: "Visa rules, passport validity and registration depend on your nationality and length of stay. Check the rules for your passport and travel dates before booking; border conditions can change.",
+    links: [
+      { label: "Official Kyrgyz e-Visa portal", href: "https://www.evisa.e-gov.kg/" },
+      { label: "Entry requirements by nationality", href: "https://www.gov.uk/foreign-travel-advice/kyrgyzstan/entry-requirements" },
+    ],
+  },
+  season: {
+    title: "Best time to go",
+    text: "The best dates depend on the route and activities. High-altitude lakes, mountain passes and ski areas have different seasonal access. Ask the organizer about current road conditions, opening periods and suitable equipment.",
+    links: [{ label: "Official regional and seasonal advice", href: "https://www.gov.uk/foreign-travel-advice/kyrgyzstan/safety-and-security" }],
+  },
+  health: {
+    title: "Health",
+    text: "Check current vaccine and health guidance, and bring prescriptions for medicines you need. Make sure your insurance covers the planned activities and emergency evacuation, especially for high-altitude trips.",
+    links: [{ label: "Current official health advice", href: "https://www.gov.uk/foreign-travel-advice/kyrgyzstan/health" }],
+  },
+};
+
+const PRACTICAL_TABS: { id: PracticalInfoTab; label: string; icon: typeof Banknote }[] = [
+  { id: "money", label: "Money & costs", icon: Banknote },
+  { id: "safety", label: "Safety", icon: Shield },
+  { id: "entry", label: "Entry & exit", icon: BookOpen },
+  { id: "season", label: "Best time", icon: Sun },
+  { id: "health", label: "Health", icon: HeartPulse },
+];
+
+function difficultyScore(difficulty: string): number | null {
+  const value = difficulty.toLowerCase();
+  if (value === "easy" || value.includes("легк")) return 1;
+  if (value === "moderate" || value.includes("сред")) return 3;
+  if (value === "challenging" || value.includes("сложн")) return 4;
+  if (value === "expert" || value.includes("опыт")) return 5;
+  return null;
+}
+
 const TourDetails = () => {
   const reviews = usePublicTestimonials();
   const averageRating = reviews.length
@@ -251,6 +381,8 @@ const TourDetails = () => {
   const [guests, setGuests] = useState(2);
   const [galleryOpen, setGalleryOpen] = useState(false);
   const [galleryIndex, setGalleryIndex] = useState(0);
+  const [selectedItineraryDay, setSelectedItineraryDay] = useState<number | null>(null);
+  const [activeTravelInfo, setActiveTravelInfo] = useState<PracticalInfoTab | null>(null);
   const [guideContactOpen, setGuideContactOpen] = useState(false);
   const [notice, setNotice] = useState("");
   const [sending, setSending] = useState(false);
@@ -294,6 +426,15 @@ const TourDetails = () => {
   );
 
   const isSaved = Boolean(tour && savedTours.includes(tour.slug));
+  const routePoints = useMemo(
+    () => (tour ? locationsForItinerary(tour.slug, tour.days) : []),
+    [tour]
+  );
+  const routeNames = useMemo(
+    () => Array.from(new Set(routePoints.map((point) => point.name))),
+    [routePoints]
+  );
+  const physicalScore = tour ? difficultyScore(tour.difficulty) : null;
   const price = tour?.price ?? 0;
   const priceCurrency: Currency =
     tour?.currency === "EUR" || tour?.currency === "KGS" ? tour.currency : "USD";
@@ -560,7 +701,7 @@ const TourDetails = () => {
               </span>
               <span className="inline-flex items-center gap-2">
                 <Users size={17} className="text-[#4A5C23]" />
-                Private or small-group request
+                Group size confirmed by organizer
               </span>
               <span className="inline-flex items-center gap-2">
                 <Languages size={17} className="text-[#4A5C23]" />
@@ -571,6 +712,77 @@ const TourDetails = () => {
             <p className="mt-6 max-w-3xl text-lg leading-8 text-gray-600">
               {tour.shortDescription}
             </p>
+
+            <section className="mt-7 rounded-3xl border border-[#e6e9df] bg-[#f7f8f4] p-5 sm:p-6" aria-label="Tour at a glance">
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <div>
+                  <p className="text-xs font-bold uppercase tracking-[0.16em] text-[#71805a]">Tour at a glance</p>
+                  <p className="mt-1 text-sm text-gray-500">Key details for planning your trip</p>
+                </div>
+              </div>
+
+              <div className="mt-5 grid gap-4 border-t border-[#e4e8dc] pt-5 sm:grid-cols-2 xl:grid-cols-3">
+                <div className="flex min-w-0 gap-3">
+                  <BedDouble size={19} className="mt-0.5 shrink-0 text-[#4A5C23]" />
+                  <div><p className="text-xs text-gray-500">Comfort</p><p className="mt-0.5 text-sm font-semibold text-[#17200f]">Accommodation varies by tour</p><p className="mt-1 text-xs text-gray-500">Check the included services below</p></div>
+                </div>
+                <div className="flex min-w-0 gap-3">
+                  <Dumbbell size={19} className="mt-0.5 shrink-0 text-[#4A5C23]" />
+                  <div><p className="text-xs text-gray-500">Physical rating</p><p className="mt-0.5 text-sm font-semibold capitalize text-[#17200f]">{physicalScore ? `${tour.difficulty} · ${physicalScore}/5` : tour.difficulty}</p></div>
+                </div>
+                <div className="flex min-w-0 gap-3">
+                  <Globe2 size={19} className="mt-0.5 shrink-0 text-[#4A5C23]" />
+                  <div><p className="text-xs text-gray-500">Country</p><p className="mt-0.5 text-sm font-semibold text-[#17200f]">Kyrgyzstan</p></div>
+                </div>
+                <div className="flex min-w-0 gap-3">
+                  <Route size={19} className="mt-0.5 shrink-0 text-[#4A5C23]" />
+                  <div><p className="text-xs text-gray-500">Route</p><p className="mt-0.5 text-sm font-semibold text-[#17200f]">{routeNames.length ? routeNames.join(" → ") : tour.location}</p></div>
+                </div>
+                <div className="flex min-w-0 gap-3">
+                  <Users size={19} className="mt-0.5 shrink-0 text-[#4A5C23]" />
+                  <div><p className="text-xs text-gray-500">Group size</p><p className="mt-0.5 text-sm font-semibold text-[#17200f]">Confirm with organizer</p></div>
+                </div>
+                <div className="flex min-w-0 gap-3">
+                  <Clock3 size={19} className="mt-0.5 shrink-0 text-[#4A5C23]" />
+                  <div><p className="text-xs text-gray-500">Duration</p><p className="mt-0.5 text-sm font-semibold text-[#17200f]">{tour.durationLabel}</p></div>
+                </div>
+              </div>
+
+              <div className="mt-5 border-t border-[#e4e8dc] pt-5" aria-label="Before you go: travel information">
+                <div className="mb-3">
+                  <p className="text-xs font-bold uppercase tracking-[0.15em] text-[#71805a]">Kyrgyzstan travel notes</p>
+                  <h3 className="mt-1 text-base font-bold text-[#17200f]">Plan with confidence</h3>
+                </div>
+                <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 xl:grid-cols-5">
+                  {PRACTICAL_TABS.map(({ id: tabId, label, icon: Icon }) => (
+                    <button
+                      key={tabId}
+                      type="button"
+                      onClick={() => setActiveTravelInfo((current) => current === tabId ? null : tabId)}
+                      aria-expanded={activeTravelInfo === tabId}
+                      aria-controls="practical-info-panel"
+                      className={`inline-flex min-h-11 items-center justify-center gap-2 rounded-xl px-3 py-2.5 text-xs font-semibold transition sm:text-sm ${activeTravelInfo === tabId ? "bg-[#4A5C23] text-white" : "bg-white text-gray-600 hover:bg-[#e9eddf]"}`}
+                    >
+                      <Icon size={16} />{label}
+                    </button>
+                  ))}
+                </div>
+                {activeTravelInfo && (
+                  <div id="practical-info-panel" className="mt-3 rounded-2xl border border-[#e4e8dc] bg-white p-4 sm:p-5">
+                    <h4 className="text-base font-bold text-[#17200f]">{PRACTICAL_INFO[activeTravelInfo].title}</h4>
+                    <p className="mt-2 text-sm leading-6 text-gray-600">{PRACTICAL_INFO[activeTravelInfo].text}</p>
+                    <div className="mt-4 flex flex-wrap gap-x-5 gap-y-2">
+                      {PRACTICAL_INFO[activeTravelInfo].links.map((link) => (
+                        <a key={link.href} href={link.href} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#4A5C23] underline decoration-[#cbd4b8] underline-offset-4 hover:text-[#35451a]">
+                          {link.label}<ExternalLink size={13} />
+                        </a>
+                      ))}
+                    </div>
+                    <p className="mt-4 border-t border-gray-100 pt-3 text-[11px] leading-5 text-gray-400">General planning information only. Official rules and conditions may change; check the latest advice for your nationality and travel dates.</p>
+                  </div>
+                )}
+              </div>
+            </section>
 
             <div className="mt-8 grid grid-cols-2 gap-3 sm:grid-cols-3">
               {galleryImages.slice(0, 3).map((image, index) => (
@@ -651,9 +863,12 @@ const TourDetails = () => {
               {tour.days.length > 0 ? (
                 <div className="mt-7 space-y-4">
                   {tour.days.map((day) => (
-                    <article
+                    <button
                       key={`${day.day}-${day.title}`}
-                      className="flex gap-4 rounded-2xl border border-gray-100 p-5 sm:gap-6 sm:p-6"
+                      type="button"
+                      onClick={() => setSelectedItineraryDay((selected) => selected === day.day ? null : day.day)}
+                      aria-pressed={selectedItineraryDay === day.day}
+                      className={`flex w-full gap-4 rounded-2xl border p-5 text-left transition sm:gap-6 sm:p-6 ${selectedItineraryDay === day.day ? "border-[#8e9e70] bg-[#f7f8f4] shadow-sm" : "border-gray-100 hover:border-[#d5dcc9] hover:bg-[#fbfcf9]"}`}
                     >
                       <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-[#e9eddf] font-bold text-[#4A5C23]">
                         {day.day}
@@ -669,8 +884,58 @@ const TourDetails = () => {
                           {day.description}
                         </p>
                       </div>
-                    </article>
+                    </button>
                   ))}
+                  <div className="overflow-hidden rounded-3xl border border-gray-100 bg-white shadow-sm">
+                    <div className="flex flex-wrap items-center justify-between gap-2 px-5 py-4 sm:px-6">
+                      <div>
+                        <h3 className="font-bold text-[#17200f]">Route map</h3>
+                        <p className="mt-1 text-xs text-gray-500">Select a day above or a numbered marker to focus the route.</p>
+                      </div>
+                      {selectedItineraryDay !== null && (
+                        <button type="button" onClick={() => setSelectedItineraryDay(null)} className="rounded-full bg-[#f4f5f0] px-3 py-1.5 text-xs font-semibold text-[#4A5C23] hover:bg-[#e9eddf]">Show full route</button>
+                      )}
+                    </div>
+                    <div className="h-[340px] w-full sm:h-[420px]">
+                      <MapContainer center={[41.8, 74.6]} zoom={6} minZoom={5} maxZoom={15} scrollWheelZoom={false} zoomControl={false} className="tour-route-map h-full w-full">
+                        <TileLayer
+                          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                        />
+                        <ZoomControl position="bottomright" />
+                        <RouteMapFocus points={routePoints} selectedDay={selectedItineraryDay} />
+                        {routePoints.length > 1 && (
+                          <Polyline positions={routePoints.map((point) => [point.lat, point.lng])} pathOptions={{ color: "#4A5C23", weight: 3, opacity: 0.75, dashArray: "7 8" }} />
+                        )}
+                        {routePoints.map((point, index) => {
+                          const active = selectedItineraryDay === null || selectedItineraryDay === point.day;
+                          const icon = L.divIcon({
+                            className: "tour-route-marker-wrap",
+                            html: `<span class="tour-route-marker${active ? " is-active" : ""}">${point.day}</span>`,
+                            iconSize: [34, 34],
+                            iconAnchor: [17, 17],
+                          });
+                          return (
+                            <Marker
+                              key={`${point.day}-${point.name}-${index}`}
+                              position={[point.lat, point.lng]}
+                              icon={icon}
+                              eventHandlers={{ click: () => setSelectedItineraryDay(point.day) }}
+                            >
+                              <Popup>
+                                <strong>Day {point.day} · {point.name}</strong><br />
+                                <span>{point.region}</span>
+                              </Popup>
+                            </Marker>
+                          );
+                        })}
+                      </MapContainer>
+                    </div>
+                    <div className="flex flex-wrap gap-x-5 gap-y-2 border-t border-gray-100 px-5 py-3 text-xs text-gray-500 sm:px-6">
+                      <span className="inline-flex items-center gap-2"><span className="h-3 w-3 rounded-full bg-[#4A5C23]" />Day marker</span>
+                      <span>Map locations are matched from the itinerary; ask the organizer to confirm exact stops and pickup details.</span>
+                    </div>
+                  </div>
                 </div>
               ) : (
                 <p className="mt-5 rounded-2xl bg-[#f7f8f4] p-5 leading-7 text-gray-600">
@@ -724,21 +989,6 @@ const TourDetails = () => {
                     Excluded services will be confirmed by the organizer.
                   </p>
                 )}
-              </div>
-            </section>
-
-            <section id="meeting-point" className="scroll-mt-32 border-b border-gray-100 py-10">
-              <h2 className="text-3xl font-bold text-[#17200f]">
-                Meeting point
-              </h2>
-              <div className="mt-5 flex gap-4 rounded-2xl border border-gray-100 p-5">
-                <MapPin className="mt-1 shrink-0 text-[#4A5C23]" size={22} />
-                <div>
-                  <p className="font-semibold text-[#17200f]">{tour.location}</p>
-                  <p className="mt-2 leading-7 text-gray-600">
-                    The exact meeting point and pickup time will be confirmed by the organizer after your request.
-                  </p>
-                </div>
               </div>
             </section>
 
