@@ -7,8 +7,10 @@ import {
   MapPin,
 } from "lucide-react";
 import Logo from "../assets/images/logo1.webp";
+import { useLanguage } from "../lib/language";
 
 const Footer = () => {
+  const { t } = useLanguage();
   return (
     <footer className="bg-[#f4f5f0] text-[#17200f]">
       <div className="mx-auto max-w-7xl px-5 md:px-8">
@@ -28,21 +30,20 @@ const Footer = () => {
 </Link>
 
             <h2 className="mt-7 max-w-md text-3xl font-semibold leading-tight tracking-tight md:text-4xl">
-              Find your own way
+              {t("Find your own way")}
               <br />
-              through Kyrgyzstan.
+              {t("through Kyrgyzstan.")}
             </h2>
 
             <p className="mt-4 max-w-md text-sm leading-7 text-gray-600 md:text-base">
-              Mountain trails, alpine lakes and unforgettable encounters
-              with the culture of the Silk Road.
+              {t("Mountain trails, alpine lakes and unforgettable encounters with the culture of the Silk Road.")}
             </p>
 
             <Link
               to="/itineraries"
               className="mt-7 inline-flex items-center gap-3 rounded-full bg-[#4a5c23] px-6 py-3.5 text-sm font-semibold text-white transition hover:bg-[#35451a]"
             >
-              Explore our tours
+              {t("Explore our tours")}
               <ArrowRight size={17} />
             </Link>
           </div>
@@ -50,16 +51,17 @@ const Footer = () => {
           {/* DISCOVER */}
           <div>
             <h3 className="text-xs font-semibold uppercase tracking-[0.2em] text-gray-500">
-              Discover
+              {t("Company")}
             </h3>
 
             <ul className="mt-6 space-y-4">
               {[
-                { label: "About us", to: "/about" },
-                { label: "Our itineraries", to: "/itineraries" },
-                { label: "Gallery", to: "/gallery" },
-                { label: "Explore the map", to: "/map" },
-                { label: "Saved tours", to: "/saved" },
+                { label: t("About us"), to: "/about" },
+                { label: t("Our itineraries"), to: "/itineraries" },
+                { label: t("Gallery"), to: "/gallery" },
+                { label: t("Explore the map"), to: "/map" },
+                { label: t("Saved tours"), to: "/saved" },
+                { label: t("For Partners"), to: "/partners" },
               ].map((item) => (
                 <li key={item.to}>
                   <Link
@@ -76,18 +78,18 @@ const Footer = () => {
           {/* CONTACT */}
           <div>
             <h3 className="text-xs font-semibold uppercase tracking-[0.2em] text-gray-500">
-              Get in touch
+              {t("Get in touch")}
             </h3>
 
             <p className="mt-6 max-w-xs text-sm leading-6 text-gray-600">
-              Planning a trip or need help choosing an itinerary? Let's talk.
+              {t("Planning a trip or need help choosing an itinerary? Let's talk.")}
             </p>
 
             <Link
               to="/contact"
               className="mt-5 inline-flex items-center gap-2 font-semibold text-[#4a5c23] transition hover:text-[#17200f]"
             >
-              Contact us
+              {t("Contact us")}
               <ArrowUpRight size={17} />
             </Link>
 
@@ -113,15 +115,15 @@ const Footer = () => {
 
         {/* BOTTOM BAR */}
         <div className="flex flex-col gap-3 py-6 text-xs text-gray-500 sm:flex-row sm:items-center sm:justify-between">
-          <p>© {new Date().getFullYear()} Kyrgyz Tours. All rights reserved.</p>
+          <p>© {new Date().getFullYear()} Kyrgyz Tours. {t("All rights reserved.")}</p>
 
-          <p>Made for curious travelers.</p>
+          <p>{t("Made for curious travelers.")}</p>
 
           <Link
             to="/contact"
             className="transition hover:text-[#4a5c23]"
           >
-            Get in touch ↗
+            {t("Get in touch ↗")}
           </Link>
         </div>
       </div>

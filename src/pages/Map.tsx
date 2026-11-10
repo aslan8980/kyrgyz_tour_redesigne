@@ -19,6 +19,7 @@ import {
 } from "lucide-react";
 
 import Logo from "../assets/images/logo1.webp";
+import { useLanguage } from "../lib/language";
 
 type Category =
   | "all"
@@ -532,6 +533,7 @@ const MapTools = ({
 };
 
 const Map = () => {
+  const { language, setLanguage, t } = useLanguage();
   const mapRef = useRef<GoogleMapApi | null>(null);
   const [mapError, setMapError] = useState("");
   const [activeCategory, setActiveCategory] =
@@ -630,21 +632,26 @@ const Map = () => {
             <div className="hidden sm:block h-7 w-px bg-gray-200"></div>
 
             <span className="hidden sm:block text-sm font-semibold text-gray-700">
-              Explore Kyrgyzstan
+              {t("Explore Kyrgyzstan")}
             </span>
           </Link>
 
           <div className="flex items-center gap-3">
             <div className="hidden md:flex items-center gap-2 text-sm text-gray-500">
               <MapPin className="w-4 h-4" />
-              Interactive Map
+              {t("Interactive Map")}
             </div>
+
+            <label className="sr-only" htmlFor="map-language">Language</label>
+            <select id="map-language" value={language} onChange={(event) => setLanguage(event.target.value as "en" | "ru")} className="rounded-lg border border-gray-200 bg-white px-2 py-2 text-xs text-gray-700">
+              <option value="en">EN</option><option value="ru">RU</option>
+            </select>
 
             <Link
               to="/"
               className="text-sm font-medium text-[#4A5C23] hover:text-[#85BC03] transition-colors"
             >
-              Back to website
+              {t("Back to website")}
             </Link>
           </div>
         </div>
@@ -725,11 +732,11 @@ const Map = () => {
             <div className="flex items-center justify-between mb-4">
               <div>
                 <h1 className="text-xl font-bold text-gray-900">
-                  Explore Kyrgyzstan
+                  {t("Explore Kyrgyzstan")}
                 </h1>
 
                 <p className="text-sm text-gray-500 mt-1">
-                  Find places, food and experiences
+                  {t("Find places, food and experiences")}
                 </p>
               </div>
 
@@ -752,7 +759,7 @@ const Map = () => {
                 onChange={(event) =>
                   setSearch(event.target.value)
                 }
-                placeholder="Search places..."
+                placeholder={t("Search places...")}
                 className="w-full h-11 pl-10 pr-4 rounded-xl bg-gray-50 border border-gray-200 outline-none text-sm focus:border-[#4A5C23] focus:ring-1 focus:ring-[#4A5C23]"
               />
             </div>
@@ -771,7 +778,7 @@ const Map = () => {
               <SlidersHorizontal className="w-4 h-4 text-gray-500" />
 
               <h2 className="text-sm font-semibold text-gray-900">
-                Categories
+                {t("Categories")}
               </h2>
             </div>
 
@@ -810,7 +817,7 @@ const Map = () => {
                     <Icon className="w-4 h-4 shrink-0" />
 
                     <span>
-                      {category.label}
+                      {t(category.label)}
                     </span>
                   </button>
                 );
@@ -825,7 +832,7 @@ const Map = () => {
               <Leaf className="w-4 h-4 text-[#4A5C23]" />
 
               <h2 className="text-sm font-semibold text-gray-900">
-                Dietary options
+                {t("Dietary options")}
               </h2>
             </div>
 
@@ -857,7 +864,7 @@ const Map = () => {
                       }
                     `}
                   >
-                    {option.label}
+                  {t(option.label)}
                   </button>
                 );
               })}
@@ -945,11 +952,11 @@ const Map = () => {
           <div className="flex-1 overflow-y-auto">
             <div className="px-5 py-4 flex items-center justify-between">
               <h2 className="text-sm font-semibold text-gray-900">
-                Places
+                {t("Places")}
               </h2>
 
               <span className="text-xs text-gray-500">
-                {filteredPlaces.length} found
+                {filteredPlaces.length} {t("found")}
               </span>
             </div>
 
@@ -959,7 +966,7 @@ const Map = () => {
                   <MapPin className="w-8 h-8 mx-auto text-gray-300" />
 
                   <h3 className="font-semibold text-gray-800 mt-3">
-                    Nothing found
+                    {t("Nothing found")}
                   </h3>
 
                   <p className="text-sm text-gray-500 mt-1">
@@ -1014,7 +1021,7 @@ const Map = () => {
                         <div className="min-w-0 flex-1">
                           <div className="flex items-start justify-between gap-2">
                             <h3 className="font-semibold text-sm text-gray-900 truncate">
-                              {place.name}
+                          {t(place.name)}
                             </h3>
 
                             {place.rating && (
@@ -1026,11 +1033,11 @@ const Map = () => {
                           </div>
 
                           <p className="text-xs text-[#4A5C23] mt-1">
-                            {place.region}
+                          {t(place.region)}
                           </p>
 
                           <p className="text-xs text-gray-500 mt-2 line-clamp-2">
-                            {place.description}
+                          {t(place.description)}
                           </p>
 
                           {place.dietary &&

@@ -1,7 +1,9 @@
 import { Button } from "@/components/ui/button";
 import KyrgyzstanImage from "../assets/images/site/editorial/home-about-ala-archa.jpg";
+import { useLanguage } from "../lib/language";
 
 const Welcome = () => {
+  const { t } = useLanguage();
   const handleExploreClick = () => {
     const itinerariesSection =
       document.getElementById("itineraries");
@@ -24,26 +26,20 @@ const Welcome = () => {
             <span className="w-2 h-2 bg-[#4a5c23] rounded-full"></span>
 
             <span className="text-sm font-medium">
-              Welcome to Kyrgyzstan
+              {t("Welcome to Kyrgyzstan")}
             </span>
           </h3>
 
           <h2 className="text-4xl md:text-5xl font-bold leading-tight">
-            Discover the Land of Mountains and Nomads
+            {t("Discover the Land of Mountains and Nomads")}
           </h2>
 
           <p className="text-gray-600 leading-relaxed">
-            Kyrgyzstan is a country of breathtaking mountains,
-            crystal-clear lakes, vast valleys and centuries-old
-            nomadic traditions. From peaceful mountain landscapes
-            to unforgettable adventures, every journey offers
-            something new to discover.
+            {t("Kyrgyzstan is a country of breathtaking mountains, crystal-clear lakes, vast valleys and centuries-old nomadic traditions. From peaceful mountain landscapes to unforgettable adventures, every journey offers something new to discover.")}
           </p>
 
           <p className="text-gray-600 leading-relaxed">
-            Explore the beauty of Issyk-Kul, hike through
-            Ala-Archa, discover Karakol and experience the unique
-            hospitality and culture of the Kyrgyz people.
+            {t("Explore the beauty of Issyk-Kul, hike through Ala-Archa, discover Karakol and experience the unique hospitality and culture of the Kyrgyz people.")}
           </p>
 
           {/* Explore Itineraries */}
@@ -51,7 +47,7 @@ const Welcome = () => {
             onClick={handleExploreClick}
             className="bg-[#4A5C23] hover:bg-[#85BC03] text-white mt-4"
           >
-            Explore Itineraries
+            {t("Explore Itineraries")}
           </Button>
         </div>
 

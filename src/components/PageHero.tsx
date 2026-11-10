@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { useLanguage } from "../lib/language";
 
 type PageHeroProps = {
   image: string;
@@ -9,7 +10,9 @@ type PageHeroProps = {
   children?: ReactNode;
 };
 
-const PageHero = ({ image, imageAlt, eyebrow, title, description, children }: PageHeroProps) => (
+const PageHero = ({ image, imageAlt, eyebrow, title, description, children }: PageHeroProps) => {
+  const { t } = useLanguage();
+  return (
   <section className="kt-page-hero relative flex h-[88svh] min-h-[680px] max-h-[980px] items-center overflow-hidden text-white">
     <img
       src={image}
@@ -23,18 +26,19 @@ const PageHero = ({ image, imageAlt, eyebrow, title, description, children }: Pa
       <div className="max-w-4xl">
         <div className="mb-7 inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/15 px-5 py-3 backdrop-blur-sm">
           <span className="h-2 w-2 rounded-full bg-[#d7b85a]" />
-          <span className="text-sm font-medium text-white">{eyebrow}</span>
+          <span className="text-sm font-medium text-white">{t(eyebrow)}</span>
         </div>
         <h1 className="max-w-4xl text-5xl font-light leading-[1.08] tracking-tight text-white sm:text-6xl md:text-7xl lg:text-[clamp(4rem,6vw,6rem)]">
-          {title}
+          {t(title)}
         </h1>
         <p className="mt-7 max-w-3xl text-base leading-7 text-white/90 sm:text-lg sm:leading-8 md:text-xl">
-          {description}
+          {t(description)}
         </p>
         {children}
       </div>
     </div>
   </section>
-);
+  );
+};
 
 export default PageHero;

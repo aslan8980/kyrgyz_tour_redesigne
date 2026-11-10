@@ -18,6 +18,7 @@ import type { User } from "@supabase/supabase-js";
 import { supabase } from "../lib/supabase";
 import TourEditor from "./TourEditor";
 import AdminSiteContent from "./AdminSiteContent";
+import AdminPartners from "./AdminPartners";
 
 
 
@@ -43,7 +44,7 @@ type Tour = {
   show_on_home: boolean;
 };
 
-type AdminSection = "tours" | "seasonal" | "gallery" | "reviews";
+type AdminSection = "tours" | "seasonal" | "gallery" | "reviews" | "partners";
 
 function errorMessage(error: unknown, fallback: string) {
   if (error instanceof Error) return error.message;
@@ -276,7 +277,7 @@ export default function Admin() {
       <div className="max-w-7xl mx-auto px-5 sm:px-8 py-10">
         <nav className="mb-8 flex flex-wrap gap-2" aria-label="Разделы админ-панели">
           {([
-            ["tours", "Все туры"], ["seasonal", "Сезонные на главной"], ["gallery", "Галерея"], ["reviews", "Отзывы"],
+            ["tours", "Все туры"], ["seasonal", "Сезонные на главной"], ["gallery", "Галерея"], ["reviews", "Отзывы"], ["partners", "Партнёры"],
           ] as [AdminSection, string][]).map(([key, label]) => (
             <button key={key} type="button" onClick={() => setSection(key)} className={`rounded-full px-5 py-3 text-sm font-semibold transition ${section === key ? "bg-[#4A5C23] text-white" : "border border-gray-200 bg-white text-gray-700 hover:bg-gray-50"}`}>
               {label}
@@ -284,7 +285,7 @@ export default function Admin() {
           ))}
         </nav>
 
-        {section === "gallery" || section === "reviews" ? <AdminSiteContent section={section} /> : section === "seasonal" ? (
+        {section === "gallery" || section === "reviews" ? <AdminSiteContent section={section} /> : section === "partners" ? <AdminPartners /> : section === "seasonal" ? (
           <section className="rounded-3xl border border-gray-100 bg-white p-6 shadow-sm">
             <h2 className="text-2xl font-bold text-[#17200f]">Сезонные туры на главной</h2>
             <p className="mb-6 mt-2 text-sm text-gray-600">Выберите опубликованные туры для блока Explore Kyrgyzstan with Expert-Planned Journeys. Фото карточки и название настраиваются в редакторе тура.</p>

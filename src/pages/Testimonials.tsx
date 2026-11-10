@@ -6,8 +6,10 @@ import { usePublicTestimonials } from "../hooks/usePublicTestimonials";
 import TestimonialsHero from "../assets/images/site/hero/hero-testimonials.jpg";
 import GatheringPhoto from "../assets/images/site/editorial/testimonial-gathering.jpg";
 import ReflectionPhoto from "../assets/images/site/editorial/testimonial-reflection.jpg";
+import { useLanguage } from "../lib/language";
 
 const Testimonials = () => {
+  const { t } = useLanguage();
   const testimonials = usePublicTestimonials();
   const featuredTestimonial = testimonials[1] || testimonials[0];
 
@@ -18,9 +20,9 @@ const Testimonials = () => {
       <PageHero
         image={TestimonialsHero}
         imageAlt="Travelers and a Kyrgyz guide celebrating on a mountain ridge"
-        eyebrow="Traveler Stories"
-        title="Stories From The Journey"
-        description="Traveling is about more than places. It is about the people you meet, the memories you create and the stories you take home with you."
+        eyebrow={t("Traveler Stories")}
+        title={t("Stories From The Journey")}
+        description={t("Traveling is about more than places. It is about the people you meet, the memories you create and the stories you take home with you.")}
       />
 
       {/* INTRO */}
@@ -29,18 +31,16 @@ const Testimonials = () => {
           <div className="inline-flex items-center gap-2 bg-[#c9cebd] rounded-full px-4 py-2">
             <span className="w-2 h-2 bg-[#4a5c23] rounded-full" />
             <span className="text-sm font-medium">
-              Voices From The Road
+              {t("Voices From The Road")}
             </span>
           </div>
 
           <h2 className="mt-6 text-4xl md:text-5xl font-bold">
-            Why people remember Kyrgyzstan
+            {t("Why people remember Kyrgyzstan")}
           </h2>
 
           <p className="mt-6 text-lg text-gray-600 leading-relaxed">
-            The mountains may be what brings travelers here, but the
-            experiences, people and culture are what make them want to
-            return.
+            {t("The mountains may be what brings travelers here, but the experiences, people and culture are what make them want to return.")}
           </p>
         </div>
       </section>
@@ -84,12 +84,12 @@ const Testimonials = () => {
             <div className="inline-flex items-center gap-2 bg-white rounded-full px-4 py-2">
               <span className="w-2 h-2 bg-[#4a5c23] rounded-full" />
               <span className="text-sm font-medium">
-                Traveler Experiences
+                {t("Traveler Experiences")}
               </span>
             </div>
 
             <h2 className="mt-6 text-4xl md:text-5xl font-bold">
-              Every journey is different.
+              {t("Every journey is different.")}
             </h2>
           </div>
 
@@ -141,27 +141,25 @@ const Testimonials = () => {
             <div className="inline-flex items-center gap-2 bg-[#c9cebd] rounded-full px-4 py-2">
               <span className="w-2 h-2 bg-[#4a5c23] rounded-full" />
               <span className="text-sm font-medium">
-                Your Story Could Be Next
+                {t("Your Story Could Be Next")}
               </span>
             </div>
 
             <h2 className="mt-6 text-4xl md:text-5xl font-bold leading-tight">
-              Come experience
+              {t("Come experience")}
               <br />
-              Kyrgyzstan yourself.
+              {t("Kyrgyzstan yourself.")}
             </h2>
 
             <p className="mt-6 text-lg text-gray-600 leading-relaxed">
-              Everyone experiences Kyrgyzstan differently. Some come for
-              the mountains. Some come for the lakes. Others come to
-              experience a culture unlike anywhere else.
+              {t("Everyone experiences Kyrgyzstan differently. Some come for the mountains. Some come for the lakes. Others come to experience a culture unlike anywhere else.")}
             </p>
 
             <a
               href="/itineraries"
               className="inline-flex items-center gap-2 mt-8 bg-[#4A5C23] text-white px-7 py-3.5 rounded-full font-semibold hover:bg-[#364518] transition-colors"
             >
-              Find Your Journey
+              {t("Find Your Journey")}
               <ArrowRight className="w-5 h-5" />
             </a>
           </div>
@@ -173,15 +171,15 @@ const Testimonials = () => {
         <div className="max-w-7xl mx-auto bg-[#17200f] rounded-[2rem] py-12 px-7 text-white md:py-16 md:px-14">
           <div className="grid gap-10 md:grid-cols-2 md:items-center md:gap-14">
             <div className="text-center md:text-left">
-              <h2 className="text-4xl md:text-5xl font-bold">Your story starts here.</h2>
+              <h2 className="text-4xl md:text-5xl font-bold">{t("Your story starts here.")}</h2>
               <p className="mt-5 max-w-xl text-lg text-white/70">
-                Discover Kyrgyzstan and create memories worth sharing.
+                {t("Discover Kyrgyzstan and create memories worth sharing.")}
               </p>
               <a
                 href="/contact"
                 className="inline-flex items-center gap-2 mt-7 bg-white text-gray-900 px-8 py-4 rounded-full font-semibold hover:bg-gray-100 transition-colors"
               >
-                Start Your Journey
+                {t("Start Your Journey")}
                 <ArrowRight className="w-5 h-5" />
               </a>
             </div>

@@ -3,11 +3,13 @@ import { useEffect, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { Heart } from "lucide-react";
 import Logo from "../assets/images/logo1.webp";
+import { useLanguage } from "../lib/language";
 
 const Navigation = () => {
   const [menuOpen, setMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const location = useLocation();
+  const { language, setLanguage, t } = useLanguage();
 
   useEffect(() => {
     const updateScroll = () => setScrolled(window.scrollY > 70);
@@ -70,11 +72,23 @@ const Navigation = () => {
                 }`}
               >
                 {item.icon && <Heart size={15} />}
-                {item.name}
+                {t(item.name)}
                 <span className="kt-nav-underline" />
               </Link>
             ))}
           </div>
+
+          <label className="ml-auto mr-4 hidden items-center gap-2 text-xs font-medium lg:flex" aria-label={t("Language")}>
+            <span className="sr-only">{t("Language")}</span>
+            <select
+              value={language}
+              onChange={(event) => setLanguage(event.target.value as "en" | "ru")}
+              className="kt-nav-link cursor-pointer rounded-full border border-current/15 bg-transparent px-3 py-2 text-xs outline-none"
+            >
+              <option value="en">EN</option>
+              <option value="ru">RU</option>
+            </select>
+          </label>
 
           <button
             type="button"
@@ -99,9 +113,16 @@ const Navigation = () => {
                 }`}
               >
                 {item.icon && <Heart size={16} />}
-                {item.name}
+                {t(item.name)}
               </Link>
             ))}
+            <label className="flex items-center justify-between rounded-xl px-4 py-3 text-sm">
+              {t("Language")}
+              <select value={language} onChange={(event) => setLanguage(event.target.value as "en" | "ru")} className="rounded-lg border border-current/20 bg-transparent px-3 py-2">
+                <option value="en">English</option>
+                <option value="ru">Русский</option>
+              </select>
+            </label>
           </div>
         )}
       </div>

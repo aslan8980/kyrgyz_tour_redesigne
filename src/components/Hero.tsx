@@ -8,6 +8,7 @@ import {
 } from "lucide-react";
 import Slide2 from "../assets/images/site/hero/home-journey-b.jpg";
 import Slide3 from "../assets/images/site/hero/home-journey-c.jpg";
+import { useLanguage } from "../lib/language";
 
 const slides = [
   {
@@ -37,6 +38,7 @@ const slides = [
 ];
 
 const Hero = () => {
+  const { t } = useLanguage();
   const [currentSlide, setCurrentSlide] = useState(0);
 
   useEffect(() => {
@@ -89,15 +91,15 @@ const Hero = () => {
           <div className="relative z-10 mx-auto flex h-full w-full max-w-[1600px] items-center px-6 pb-16 pt-24 sm:px-10 lg:px-16">
             <div className="max-w-[760px] animate-fadeIn">
               <p className="mb-6 text-[10px] font-normal uppercase tracking-[0.28em] text-white/90 sm:text-xs">
-                {slide.eyebrow}
+                {t(slide.eyebrow)}
               </p>
 
               <h1 className="whitespace-pre-line font-montserrat text-5xl font-light leading-[1.08] tracking-[-0.045em] sm:text-6xl md:text-7xl lg:text-[clamp(4.3rem,7vw,7rem)]">
-                {slide.title}
+                {t(slide.title)}
               </h1>
 
               <p className="mt-6 max-w-[540px] text-sm font-light leading-7 text-white/95 sm:text-base sm:leading-8">
-                {slide.description}
+                {t(slide.description)}
               </p>
 
               <div className="mt-9 flex flex-wrap gap-4">
@@ -105,7 +107,7 @@ const Hero = () => {
                   onClick={goToItineraries}
                   className="h-[54px] rounded-full border border-white bg-white px-7 text-xs font-medium tracking-wide text-[#273126] transition hover:bg-white/90"
                 >
-                  Explore tours
+                  {t("Explore tours")}
                   <ArrowUpRight className="ml-3 h-4 w-4" strokeWidth={1.5} />
                 </Button>
 
@@ -116,7 +118,7 @@ const Hero = () => {
                   variant="outline"
                   className="h-[54px] rounded-full border border-white/75 bg-transparent px-7 text-xs font-normal tracking-wide text-white transition hover:bg-white/15 hover:text-white"
                 >
-                  Plan my trip
+                  {t("Plan my trip")}
                   <ArrowUpRight className="ml-3 h-4 w-4" strokeWidth={1.5} />
                 </Button>
               </div>

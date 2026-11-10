@@ -384,6 +384,7 @@ const TourDetails = () => {
   const [selectedItineraryDay, setSelectedItineraryDay] = useState<number | null>(null);
   const [activeTravelInfo, setActiveTravelInfo] = useState<PracticalInfoTab | null>(null);
   const [guideContactOpen, setGuideContactOpen] = useState(false);
+  const [guideContactSending, setGuideContactSending] = useState(false);
   const [notice, setNotice] = useState("");
   const [sending, setSending] = useState(false);
 
@@ -498,16 +499,48 @@ const TourDetails = () => {
     travelers: String(guests),
   });
 
-  window.location.assign(`/contact?${params.toString()}`);
+  navigate(`/booking?${params.toString()}`);
 };
 
 
-  const handleGuideContactSubmit = (event: FormEvent<HTMLFormElement>) => {
+  const handleGuideContactSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    setGuideContactOpen(false);
-    setNotice(
-      "The contact form is prepared. Message delivery needs to be connected to a backend or messaging service."
-    );
+    if (guideContactSending) return;
+    const form = event.currentTarget;
+    const values = new FormData(form);
+    const name = String(values.get("name") ?? "").trim();
+    const email = String(values.get("email") ?? "").trim();
+    const message = String(values.get("message") ?? "").trim();
+
+    setGuideContactSending(true);
+    try {
+      const { error } = await supabase.from("contact_messages").insert({
+        name,
+        email,
+        whatsapp: null,
+        preferred_contact_method: "email",
+        tour_id: tour.id,
+        tour_title: tour.title,
+        preferred_date: selectedDate || null,
+        travelers: guests,
+        message,
+      });
+
+      if (error) {
+        console.error("Guide question submission failed:", error.message);
+        setNotice("We couldn't send your question. Please try again or use the Contact page.");
+        return;
+      }
+
+      form.reset();
+      setGuideContactOpen(false);
+      setNotice("Your question has been sent. We'll reply by email.");
+    } catch (error) {
+      console.error("Unexpected guide question submission error:", error);
+      setNotice("We couldn't send your question. Please try again.");
+    } finally {
+      setGuideContactSending(false);
+    }
   };
 
   const calendarCells = useMemo(() => {
@@ -1242,7 +1275,7 @@ const TourDetails = () => {
                 className="mt-5 flex w-full items-center justify-center gap-2 rounded-full bg-[#4A5C23] px-5 py-4 font-semibold text-white transition hover:bg-[#35451a]"
               >
                 <CalendarDays size={19} />
-                Request to book
+                Book this tour
               </button>
               <button
                 type="button"
@@ -1353,7 +1386,7 @@ const TourDetails = () => {
           </p>
         </div>
         <button type="button" onClick={openBooking} className="rounded-full bg-[#4A5C23] px-6 py-3 font-semibold text-white">
-          Book tour
+          Book this tour
         </button>
       </div>
 
@@ -1452,12 +1485,12 @@ const TourDetails = () => {
                 placeholder="Your question"
                 className="w-full resize-y rounded-xl border border-gray-200 px-4 py-3 outline-none focus:border-[#4A5C23]"
               />
-              <button type="submit" className="flex w-full items-center justify-center gap-2 rounded-full bg-[#4A5C23] px-5 py-4 font-semibold text-white transition hover:bg-[#35451a]">
+              <button type="submit" disabled={guideContactSending} className="flex w-full items-center justify-center gap-2 rounded-full bg-[#4A5C23] px-5 py-4 font-semibold text-white transition hover:bg-[#35451a] disabled:opacity-60">
                 <Send size={18} />
-                Prepare message
+                {guideContactSending ? "Sending…" : "Send question"}
               </button>
               <p className="text-xs leading-5 text-gray-400">
-                Message delivery is not connected yet.
+                Your question will be sent to the tour team. Do not include payment details.
               </p>
             </form>
           </div>

@@ -12,6 +12,7 @@ import SongKulDusk from "../assets/images/site/gallery/gallery-song-kul-dusk.jpg
 import Craft from "../assets/images/site/gallery/gallery-craft.jpg";
 import Burana from "../assets/images/site/gallery/gallery-burana.jpg";
 import Horseman from "../assets/images/site/gallery/gallery-horseman.jpg";
+import { useLanguage } from "../lib/language";
 
 const galleryImages = [
   { image: IssykKul, title: "The Shores of Issyk-Kul", category: "Lake" },
@@ -24,6 +25,7 @@ const galleryImages = [
 type GalleryPhoto = { id: string; image_url: string; title: string; category: string };
 
 const Gallery = () => {
+  const { t } = useLanguage();
   const [activeImageIndex, setActiveImageIndex] = useState<number | null>(null);
   const [showAllPhotos, setShowAllPhotos] = useState(false);
   const [managedPhotos, setManagedPhotos] = useState<GalleryPhoto[] | null>(null);
@@ -81,9 +83,9 @@ const Gallery = () => {
       <PageHero
         image={GalleryHero}
         imageAlt="Red sandstone cliffs above a green mountain valley in Kyrgyzstan"
-        eyebrow="The Kyrgyzstan Experience"
-        title="See the Journey. Feel the Place."
-        description="Mountains, lakes, valleys and unforgettable moments. Take a visual journey through the places that make Kyrgyzstan unique."
+        eyebrow={t("The Kyrgyzstan Experience")}
+        title={t("See the Journey. Feel the Place.")}
+        description={t("Mountains, lakes, valleys and unforgettable moments. Take a visual journey through the places that make Kyrgyzstan unique.")}
       />
 
       {/* GALLERY */}
@@ -93,12 +95,12 @@ const Gallery = () => {
             <div>
               <div className="inline-flex items-center gap-2 rounded-full bg-[#c9cebd] px-4 py-2">
                 <span className="h-2 w-2 rounded-full bg-[#4a5c23]" />
-                <span className="text-sm font-medium">Explore Through Photos</span>
+                <span className="text-sm font-medium">{t("Explore Through Photos")}</span>
               </div>
-              <h2 className="mt-6 text-4xl font-bold md:text-5xl">Moments from Kyrgyzstan</h2>
+              <h2 className="mt-6 text-4xl font-bold md:text-5xl">{t("Moments from Kyrgyzstan")}</h2>
             </div>
             <p className="max-w-md leading-relaxed text-gray-600">
-              Every landscape tells a story. Explore some of the places and experiences waiting for you.
+              {t("Every landscape tells a story. Explore some of the places and experiences waiting for you.")}
             </p>
           </div>
 
@@ -108,7 +110,7 @@ const Gallery = () => {
                 key={item.title}
                 type="button"
                 onClick={() => setActiveImageIndex(index)}
-                aria-label={`Open photo: ${item.title}`}
+                aria-label={`${t("Open photo")}: ${item.title}`}
                 className={`group relative block overflow-hidden rounded-3xl text-left focus:outline-none focus-visible:ring-4 focus-visible:ring-[#4a5c23] ${
                   index === 0 ? "lg:row-span-2" : index === 4 ? "lg:col-span-2" : ""
                 }`}
@@ -123,10 +125,10 @@ const Gallery = () => {
                 />
                 <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent" />
                 <div className="pointer-events-none absolute bottom-0 left-0 right-0 p-6 text-white md:p-7">
-                  <p className="text-sm text-white/70">{item.category}</p>
+                  <p className="text-sm text-white/70">{t(item.category)}</p>
                   <h3 className="mt-1 text-2xl font-bold">{item.title}</h3>
                   <p className="mt-2 text-sm text-white/80 opacity-0 transition-opacity group-hover:opacity-100 group-focus-visible:opacity-100">
-                    Click to view full screen
+                    {t("Click to view full screen")}
                   </p>
                 </div>
               </button>
@@ -141,7 +143,7 @@ const Gallery = () => {
               className="inline-flex items-center gap-3 rounded-full border border-[#4A5C23] bg-[#4A5C23] px-8 py-4 text-sm font-semibold text-white transition hover:bg-[#35451a]"
             >
               <Images size={18} />
-              {showAllPhotos ? "Show fewer photos" : "View all photos"}
+              {showAllPhotos ? t("Show fewer photos") : t("View all photos")}
             </button>
           </div>
         </div>

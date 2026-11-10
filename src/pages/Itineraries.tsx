@@ -13,6 +13,7 @@ import FourDays from "../assets/images/4-days.webp";
 import FiveDays from "../assets/images/5-days.webp";
 import FourteenDays from "../assets/images/14-days.webp";
 import ItinerariesHero from "../assets/images/site/hero/hero-itineraries.jpg";
+import { useLanguage } from "../lib/language";
 
 type Tour = {
   id: string;
@@ -35,6 +36,7 @@ const localImages: Record<string, string> = {
 };
 
 const Itineraries = () => {
+  const { t } = useLanguage();
   const testimonials = usePublicTestimonials();
   const featuredTestimonial = testimonials[1] || testimonials[0];
   const [tours, setTours] = useState<Tour[]>([]);
@@ -79,9 +81,9 @@ const Itineraries = () => {
       <PageHero
         image={ItinerariesHero}
         imageAlt="Mountain landscape in Kyrgyzstan"
-        eyebrow="Our Journeys"
-        title="Discover Kyrgyzstan Your Way"
-        description="From short mountain escapes to unforgettable journeys across the country, choose the experience that fits your adventure."
+        eyebrow={t("Our Journeys")}
+        title={t("Discover Kyrgyzstan Your Way")}
+        description={t("From short mountain escapes to unforgettable journeys across the country, choose the experience that fits your adventure.")}
       />
 
       {/* INTRO AND TOURS */}
@@ -92,28 +94,26 @@ const Itineraries = () => {
               <div className="inline-flex items-center gap-2 rounded-full bg-[#c9cebd] px-4 py-2">
                 <span className="h-2 w-2 rounded-full bg-[#4a5c23]" />
                 <span className="text-sm font-medium">
-                  Choose Your Adventure
+                  {t("Choose Your Adventure")}
                 </span>
               </div>
 
               <h2 className="mt-6 text-4xl font-bold leading-tight md:text-5xl">
-                Journeys made for
+                {t("Journeys made for")}
                 <br />
-                curious travelers.
+                {t("curious travelers.")}
               </h2>
             </div>
 
             <p className="max-w-xl text-lg leading-relaxed text-gray-600">
-              Every itinerary is designed to help you experience more than
-              just the famous places. Discover landscapes, local traditions,
-              mountain adventures and the people who make Kyrgyzstan special.
+              {t("Every itinerary is designed to help you experience more than just the famous places. Discover landscapes, local traditions, mountain adventures and the people who make Kyrgyzstan special.")}
             </p>
           </div>
 
-          <div className="mx-auto mt-14 grid max-w-6xl grid-cols-1 gap-6 md:grid-cols-2">
+          <div className="mx-auto mt-14 grid max-w-7xl grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3">
             {loading && (
               <p className="col-span-full py-12 text-center text-gray-500">
-                Loading journeys...
+                {t("Loading journeys...")}
               </p>
             )}
 
@@ -126,10 +126,10 @@ const Itineraries = () => {
             {!loading && !error && tours.length === 0 && (
               <div className="col-span-full py-12 text-center">
                 <h3 className="text-xl font-semibold">
-                  New journeys are coming soon
+                  {t("New journeys are coming soon")}
                 </h3>
                 <p className="mt-2 text-gray-600">
-                  Please check back later to discover our tours.
+                  {t("Please check back later to discover our tours.")}
                 </p>
               </div>
             )}
@@ -160,7 +160,7 @@ const Itineraries = () => {
                 <div className="flex min-h-[285px] flex-col p-6 md:p-7">
                   <div className="flex items-center gap-2 text-sm text-gray-500">
                     <MapPin className="h-4 w-4 shrink-0 text-[#4A5C23]" />
-                    {tour.location || "Kyrgyzstan"}
+                    {tour.location || t("Kyrgyzstan")}
                   </div>
 
                   <h3 className="mt-3 text-xl font-bold leading-snug text-[#17200f] transition-colors group-hover:text-[#4A5C23] md:text-2xl">
@@ -183,7 +183,7 @@ const Itineraries = () => {
                   </div>
 
                   <div className="mt-auto flex items-center gap-2 pt-6 font-semibold text-[#4A5C23]">
-                    View Journey
+                    {t("View Journey")}
                     <ArrowRight className="h-5 w-5 transition-transform duration-300 group-hover:translate-x-2" />
                   </div>
                 </div>

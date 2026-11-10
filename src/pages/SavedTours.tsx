@@ -19,6 +19,7 @@ import FourDays from "../assets/images/4-days.webp";
 import FiveDays from "../assets/images/5-days.webp";
 import FourteenDays from "../assets/images/14-days.webp";
 import SavedHero from "../assets/images/site/hero/hero-saved.jpg";
+import { useLanguage } from "../lib/language";
 
 const FAVORITES_KEY = "kyrgyz-tours-favorites";
 
@@ -69,6 +70,7 @@ function readFavorites(): string[] {
 }
 
 const SavedTours = () => {
+  const { t } = useLanguage();
   const [favorites, setFavorites] = useState<string[]>(readFavorites);
   const [tours, setTours] = useState<Tour[]>([]);
   const [loading, setLoading] = useState(true);
@@ -133,9 +135,9 @@ const SavedTours = () => {
       <PageHero
         image={SavedHero}
         imageAlt="Mountain scenery in Kyrgyzstan"
-        eyebrow="Your Travel Wishlist"
-        title="Saved Journeys"
-        description="All the places and adventures you want to explore in Kyrgyzstan, collected in one place."
+        eyebrow={t("Your Travel Wishlist")}
+        title={t("Saved Journeys")}
+        description={t("All the places and adventures you want to explore in Kyrgyzstan, collected in one place.")}
       />
 
       <section className="px-4 pb-10 pt-10 md:px-8">
@@ -145,13 +147,13 @@ const SavedTours = () => {
             className="mb-8 inline-flex items-center gap-2 text-sm text-gray-500 transition-colors hover:text-[#4A5C23]"
           >
             <ArrowLeft size={17} />
-            Back to itineraries
+            {t("Back to itineraries")}
           </Link>
 
           <div className="flex justify-end">
             <span className="text-sm text-gray-500">
               {savedTours.length}{" "}
-              {savedTours.length === 1 ? "journey" : "journeys"} saved
+              {t(savedTours.length === 1 ? "journey" : "journeys")} {t("saved")}
             </span>
           </div>
         </div>
@@ -161,7 +163,7 @@ const SavedTours = () => {
         <div className="mx-auto max-w-7xl">
           {loading ? (
             <p className="py-16 text-center text-gray-500">
-              Loading saved journeys...
+              {t("Loading saved journeys...")}
             </p>
           ) : error ? (
             <div className="rounded-3xl bg-[#f4f5f0] px-6 py-16 text-center">

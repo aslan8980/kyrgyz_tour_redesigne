@@ -14,8 +14,10 @@ import Contact from "./Contact us";
 import { supabase } from "../lib/supabase";
 
 import { itinerariesCard } from "../data";
+import { useLanguage } from "../lib/language";
 
 const Index = () => {
+  const { t } = useLanguage();
   const [homeTours, setHomeTours] = useState<{ id: string; slug: string; title: string; main_image: string | null }[]>([]);
   const [homeToursLoaded, setHomeToursLoaded] = useState(false);
 
@@ -109,12 +111,12 @@ const Index = () => {
             <div className="inline-flex items-center gap-2 bg-[#e4e8dc] rounded-full px-4 py-2 mx-auto">
               <h3 className="font-AlbertSans font-semibold text-[#283128] flex items-center justify-center gap-2">
                 <span className="w-2 h-2 bg-[#4a5c23] rounded-full"></span>
-                Kyrgyzstan Itineraries
+                {t("Kyrgyzstan Itineraries")}
               </h3>
             </div>
 
             <h2 className="font-AlbertSans text-4xl md:text-4xl font-bold text-[#283128] mt-3">
-              Explore Kyrgyzstan with Expert-Planned Journeys
+              {t("Explore Kyrgyzstan with Expert-Planned Journeys")}
             </h2>
           </div>
 

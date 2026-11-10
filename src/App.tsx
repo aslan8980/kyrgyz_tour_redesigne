@@ -14,8 +14,11 @@ import Gallery from "./pages/Gallery";
 import Testimonials from "./pages/Testimonials";
 import Map from "./pages/Map";
 import Contact from "./pages/Contact us";
+import Payment from "./pages/Payment";
+import Partners from "./pages/Partners";
 import SavedTours from "./pages/SavedTours";
 import Footer from "./components/Footer";
+import { LanguageProvider } from "./lib/language";
 
 
 import AdminLogin from "./pages/AdminLogin";
@@ -40,6 +43,7 @@ const App = () => (
       <Toaster />
       <Sonner />
 
+      <LanguageProvider>
       <BrowserRouter>
         <Routes>
 
@@ -56,10 +60,14 @@ const App = () => (
             <Route path="/testimonials" element={<Testimonials />} />
             <Route path="/map" element={<Map />} />
             <Route path="/contact" element={<Contact />} />
+            <Route path="/booking" element={<Contact bookingMode />} />
+            <Route path="/payment" element={<Payment />} />
+            <Route path="/partners" element={<Partners />} />
             <Route path="/saved" element={<SavedTours />} />
           </Route>
         </Routes>
       </BrowserRouter>
+      </LanguageProvider>
     </TooltipProvider>
   </QueryClientProvider>
 );
