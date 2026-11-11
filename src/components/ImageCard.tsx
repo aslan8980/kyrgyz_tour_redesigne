@@ -32,7 +32,6 @@ const ImageCard: React.FC<ImageCardProps> = ({ arr }) => {
                 loading="lazy"
               />
             </Link>
-            {/* Title with link */}
             <div className="flex flex-col items-center px-5 pt-2 pb-2 text-center">
               <Link
                 to={item.url}

@@ -533,7 +533,7 @@ const MapTools = ({
 };
 
 const Map = () => {
-  const { language, setLanguage, t } = useLanguage();
+  const { t } = useLanguage();
   const mapRef = useRef<GoogleMapApi | null>(null);
   const [mapError, setMapError] = useState("");
   const [activeCategory, setActiveCategory] =
@@ -642,10 +642,6 @@ const Map = () => {
               {t("Interactive Map")}
             </div>
 
-            <label className="sr-only" htmlFor="map-language">Language</label>
-            <select id="map-language" value={language} onChange={(event) => setLanguage(event.target.value as "en" | "ru")} className="rounded-lg border border-gray-200 bg-white px-2 py-2 text-xs text-gray-700">
-              <option value="en">EN</option><option value="ru">RU</option>
-            </select>
 
             <Link
               to="/"

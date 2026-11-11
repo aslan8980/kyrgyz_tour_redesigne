@@ -1,7 +1,7 @@
 
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { ArrowRight, Clock, MapPin, Star } from "lucide-react";
+import { ArrowRight, Clock, MapPin } from "lucide-react";
 
 import Navigation from "../components/Navigation";
 import PageHero from "../components/PageHero";
@@ -14,6 +14,7 @@ import FiveDays from "../assets/images/5-days.webp";
 import FourteenDays from "../assets/images/14-days.webp";
 import ItinerariesHero from "../assets/images/site/hero/hero-itineraries.jpg";
 import { useLanguage } from "../lib/language";
+import { isPublicTourContent } from "../lib/tourContent";
 
 type Tour = {
   id: string;
@@ -61,7 +62,7 @@ const Itineraries = () => {
         console.error("Failed to load tours:", error.message);
         setError("We couldn't load the tours. Please try again later.");
       } else {
-        setTours((data ?? []) as Tour[]);
+        setTours(((data ?? []) as Tour[]).filter(isPublicTourContent));
       }
 
       setLoading(false);
@@ -220,12 +221,11 @@ const Itineraries = () => {
           <div className="grid gap-10 md:grid-cols-2 md:items-center md:gap-14">
             <div className="text-center md:text-left">
               <h2 className="text-4xl font-bold md:text-5xl">
-                Not sure which journey is right for you?
+                {t("Not sure which journey is right for you?")}
               </h2>
 
               <p className="mt-5 max-w-2xl text-lg text-white/70">
-                Tell us what kind of experience you're looking for and we'll
-                help you plan your perfect Kyrgyzstan adventure.
+                {t("Tell us what kind of experience you're looking for and we'll help you choose a route and discuss the details before booking.")}
               </p>
 
               <Link
@@ -237,15 +237,17 @@ const Itineraries = () => {
               </Link>
             </div>
 
-            <blockquote className="border-l-2 border-[#d7b85a] pl-6 md:pl-8">
-              <div className="mb-4 flex gap-1 text-[#d7b85a]" aria-label={`${featuredTestimonial?.rating || 5} out of 5 stars`}>
-                {Array.from({ length: featuredTestimonial?.rating || 5 }, (_, i) => <Star key={i} className="h-4 w-4 fill-current" />)}
+            {featuredTestimonial ? (
+              <blockquote className="border-l-2 border-[#d7b85a] pl-6 md:pl-8">
+                <p className="text-xl leading-relaxed md:text-2xl">“{featuredTestimonial.text}”</p>
+                <footer className="mt-5 text-sm text-white/65">{featuredTestimonial.name} <span className="mx-1">·</span> {featuredTestimonial.country}</footer>
+              </blockquote>
+            ) : (
+              <div className="border-l-2 border-[#d7b85a] pl-6 md:pl-8">
+                <h3 className="text-2xl font-semibold">Plan around the trip you want.</h3>
+                <p className="mt-3 leading-relaxed text-white/70">Compare the routes, then contact us to confirm dates, availability and trip details.</p>
               </div>
-              <p className="text-xl leading-relaxed md:text-2xl">
-                “{featuredTestimonial?.text || "Discover the places and culture that make every Kyrgyzstan journey unique."}”
-              </p>
-              <footer className="mt-5 text-sm text-white/65">{featuredTestimonial?.name || "Kyrgyz Tours"} <span className="mx-1">·</span> {featuredTestimonial?.country || "Traveler"}</footer>
-            </blockquote>
+            )}
           </div>
         </div>
       </section>

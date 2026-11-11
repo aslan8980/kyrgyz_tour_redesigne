@@ -1,5 +1,5 @@
 import { useEffect, useState, type FormEvent, type ReactNode } from "react";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import {
   Mail,
   MapPin,
@@ -15,6 +15,7 @@ import Navigation from "../components/Navigation";
 import PageHero from "../components/PageHero";
 import ContactHero from "../assets/images/site/hero/hero-contact.jpg";
 import { supabase } from "../lib/supabase";
+import { isPublicTourContent } from "../lib/tourContent";
 
 type TourOption = {
   id: string;
@@ -72,7 +73,7 @@ const Contact = ({ bookingMode = false }: { bookingMode?: boolean }) => {
           message: "We couldn't load the tour list. You can still try again by refreshing this page.",
         });
       } else {
-        const availableTours = (data ?? []) as TourOption[];
+        const availableTours = ((data ?? []) as TourOption[]).filter(isPublicTourContent);
         setTours(availableTours);
 
         const match = availableTours.find(
@@ -217,11 +218,11 @@ const Contact = ({ bookingMode = false }: { bookingMode?: boolean }) => {
       <PageHero
         image={ContactHero}
         imageAlt="Mountain landscape in Kyrgyzstan"
-        eyebrow={bookingMode ? "Reserve your place" : "Plan Your Trip"}
-        title={bookingMode ? "Book a tour" : "Request a Tour"}
+        eyebrow={bookingMode ? "Booking" : "Plan your trip"}
+        title={bookingMode ? "Send a booking request" : "Tell us about your trip"}
         description={bookingMode
-          ? "Send a booking request. We will confirm availability and payment details with you; payment is not enabled on this site yet."
-          : "Choose your tour, preferred date and the easiest way for us to contact you."}
+          ? "Choose a tour, date and group size. We will check availability and confirm the final price and payment arrangements with you. No payment is taken on this site."
+          : "Tell us where you would like to go, when you plan to travel and how to reach you. We will get back to you about the next steps."}
       />
 
       <main className="mx-auto max-w-7xl px-4 pt-10 pb-28 md:px-8 md:pt-14 md:pb-32">
@@ -290,7 +291,7 @@ const Contact = ({ bookingMode = false }: { bookingMode?: boolean }) => {
                   {tours.map((tour) => <option key={tour.id} value={tour.id}>{tour.title}</option>)}
                 </select>
                 {!loadingTours && tours.length === 0 && (
-                  <p className="mt-2 text-sm text-amber-700">No published tours were found. Please check the tours table and its read permissions.</p>
+              <p className="mt-2 text-sm text-amber-700">Our tour list is temporarily unavailable. Please refresh this page or contact us for help.</p>
                 )}
               </div>
 
@@ -400,7 +401,7 @@ const Contact = ({ bookingMode = false }: { bookingMode?: boolean }) => {
               <button type="submit" disabled={sending || loadingTours || tours.length === 0}
                 className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-[#4A5C23] px-8 py-3 font-medium text-white transition-colors duration-200 hover:bg-[#35451a] disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto">
                 {sending && <LoaderCircle size={18} className="animate-spin" />}
-                {sending ? "Sending request..." : bookingMode ? "Book a tour" : "Send Tour Request"}
+                {sending ? "Sending request..." : bookingMode ? "Send booking request" : "Send trip request"}
               </button>
               <p className="text-xs leading-5 text-gray-500">
                 {bookingMode
@@ -423,25 +424,27 @@ const QuestionContacts = () => {
   return (
     <section className="mx-auto max-w-4xl rounded-3xl border border-[#e6e9df] bg-[#f7f8f4] p-6 sm:p-10" aria-labelledby="question-contacts-title">
       <div className="mx-auto max-w-2xl text-center">
-        <p className="text-xs font-bold uppercase tracking-[0.16em] text-[#71805a]">Need a hand planning?</p>
-        <h2 id="question-contacts-title" className="mt-3 text-3xl font-bold text-[#17200f]">Ask us anything about your trip</h2>
-        <p className="mt-3 text-gray-600">Choose email or WhatsApp and our team will help with tours, dates and travel questions.</p>
+        <p className="text-xs font-bold uppercase tracking-[0.16em] text-[#71805a]">Trip planning</p>
+        <h2 id="question-contacts-title" className="mt-3 text-3xl font-bold text-[#17200f]">Have a question before you book?</h2>
+        <p className="mt-3 text-gray-600">Reach us by email or WhatsApp. We can help with routes, dates and practical details.</p>
       </div>
-      <div className="mt-8 grid gap-4 sm:grid-cols-2">
-        <ContactChannel
+      {(email || whatsapp) ? <div className="mt-8 grid gap-4 sm:grid-cols-2">
+        {email && <ContactChannel
           icon={<Mail size={22} />}
           title="Email us"
-          detail={email || "Email contact will be added soon"}
-          href={email ? `mailto:${email}` : undefined}
-        />
-        <ContactChannel
+          detail={email}
+          href={`mailto:${email}`}
+        />}
+        {whatsapp && <ContactChannel
           icon={<MessageCircle size={22} />}
           title="WhatsApp"
-          detail={whatsapp ? `+${whatsapp}` : "WhatsApp contact will be added soon"}
-          href={whatsapp ? `https://wa.me/${whatsapp}` : undefined}
-        />
-      </div>
-      {(!email || !whatsapp) && <p className="mt-6 text-center text-xs leading-5 text-gray-500">Contact links will become active when the email and WhatsApp number are added to the site settings.</p>}
+          detail={`+${whatsapp}`}
+          href={`https://wa.me/${whatsapp}`}
+        />}
+      </div> : <div className="mt-8 rounded-2xl border border-[#e2e7d8] bg-white p-6 text-center">
+        <p className="leading-7 text-gray-600">Direct email and WhatsApp details are not available here yet. Send us a trip request and include your question; our team will follow up.</p>
+        <Link to="/contact" className="mt-5 inline-flex rounded-full bg-[#4A5C23] px-6 py-3 font-semibold text-white transition hover:bg-[#35451a]">Send a trip request</Link>
+      </div>}
     </section>
   );
 };

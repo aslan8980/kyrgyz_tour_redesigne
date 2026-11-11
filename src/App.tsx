@@ -17,6 +17,7 @@ import Contact from "./pages/Contact us";
 import Payment from "./pages/Payment";
 import Partners from "./pages/Partners";
 import SavedTours from "./pages/SavedTours";
+import Blog from "./pages/Blog";
 import Footer from "./components/Footer";
 import { LanguageProvider } from "./lib/language";
 
@@ -58,6 +59,8 @@ const App = () => (
             <Route path="/itineraries/:id" element={<TourDetails />} />
             <Route path="/gallery" element={<Gallery />} />
             <Route path="/testimonials" element={<Testimonials />} />
+            <Route path="/blog" element={<Blog />} />
+            <Route path="/blog/:slug" element={<Blog />} />
             <Route path="/map" element={<Map />} />
             <Route path="/contact" element={<Contact />} />
             <Route path="/booking" element={<Contact bookingMode />} />

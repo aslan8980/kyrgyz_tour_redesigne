@@ -25,65 +25,65 @@ import {
 const values = [
   {
     icon: Heart,
-    title: "Authenticity",
-    text: "We believe the best way to discover Kyrgyzstan is to experience its real people, traditions, food and way of life.",
+    title: "Cultural respect",
+    text: "We introduce local customs and traditions with context, and encourage visitors to approach each community with curiosity and respect.",
   },
   {
     icon: Mountain,
-    title: "Adventure",
-    text: "From high mountain passes to remote valleys, we create experiences that take you beyond the ordinary tourist route.",
+    title: "Time outdoors",
+    text: "Our routes make room for the landscapes that draw many visitors here: mountain valleys, alpine lakes and open highland pastures.",
   },
   {
     icon: Users,
-    title: "Hospitality",
-    text: "Our guests are more than customers. We want every traveler to feel welcomed, comfortable and connected.",
+    title: "A human welcome",
+    text: "Travel is better when there is time to meet people, share a meal and learn about life in the places you visit.",
   },
   {
     icon: Globe2,
-    title: "Responsible Travel",
-    text: "We support local communities and promote respectful travel through Kyrgyzstan's natural and cultural heritage.",
+    title: "Responsible travel",
+    text: "We encourage considerate travel that respects local communities, customs and the natural places along the route.",
   },
 ];
 
 const advantages = [
   {
     icon: Compass,
-    title: "Local Knowledge",
-    text: "We know Kyrgyzstan beyond the standard tourist routes and help you discover places worth remembering.",
+    title: "Routes with context",
+    text: "Each tour page brings together its route, duration, location and day-by-day plan so you can understand what the trip involves.",
   },
   {
     icon: Sparkles,
-    title: "Personal Experiences",
-    text: "Our trips can be adapted to your interests, schedule, travel style and level of adventure.",
+    title: "Direct answers",
+    text: "Ask us about dates, availability, trip pace or practical details before you decide which route to book.",
   },
   {
     icon: Users,
-    title: "Local Connections",
-    text: "We connect travelers with local guides, guesthouses, drivers, families and communities.",
+    title: "Useful planning",
+    text: "Compare shorter and longer itineraries, then send us your dates and group size to discuss the arrangements.",
   },
   {
     icon: ShieldCheck,
-    title: "Travel With Confidence",
-    text: "We take care of the important details so you can focus on enjoying your journey.",
+    title: "Clear booking steps",
+    text: "A request is not a confirmed booking. We check availability and confirm the final price and arrangements with you first.",
   },
 ];
 
 const stats = [
   {
-    number: "1,500+",
-    label: "Travelers welcomed",
+    number: "3 days",
+    label: "Bishkek & Ala-Archa",
   },
   {
-    number: "25+",
-    label: "Destinations",
+    number: "4 days",
+    label: "Issyk-Kul & Song-Kul",
   },
   {
-    number: "40+",
-    label: "Travel experiences",
+    number: "5 days",
+    label: "Winter in Karakol",
   },
   {
-    number: "15+",
-    label: "Local partners",
+    number: "14 days",
+    label: "A wider journey across Kyrgyzstan",
   },
 ];
 
@@ -140,15 +140,15 @@ const About = () => {
         image={Slide1}
         imageAlt="A Kyrgyz eagle hunter riding across a mountain valley"
         eyebrow="About Kyrgyz Tours"
-        title="We Bring You Closer to Kyrgyzstan"
-        description="We create unforgettable journeys through the mountains, lakes, valleys and nomadic culture of one of Central Asia's most extraordinary countries."
+        title="Local journeys through Kyrgyzstan"
+        description="Explore the country through thoughtfully planned routes, mountain landscapes and encounters with everyday Kyrgyz culture. Choose a ready-made itinerary or contact us to discuss your plans."
       >
             <div className="mt-9 flex flex-wrap gap-4">
               <a
                 href="/itineraries"
                 className="inline-flex items-center gap-2 bg-white text-gray-900 px-7 py-3.5 rounded-full font-semibold hover:bg-[#f0f1eb] transition-colors"
               >
-                Explore Our Tours
+                Browse our tours
                 <ArrowRight className="w-5 h-5" />
               </a>
 
@@ -156,7 +156,7 @@ const About = () => {
                 href="/contact"
                 className="inline-flex items-center gap-2 border border-white/70 text-white px-7 py-3.5 rounded-full font-semibold hover:bg-white/10 transition-colors"
               >
-                Start Your Journey
+                Plan your trip
               </a>
             </div>
       </PageHero>
@@ -168,42 +168,33 @@ const About = () => {
             <div>
               <div className="inline-flex items-center gap-2 bg-[#c9cebd] rounded-full px-4 py-2">
                 <span className="w-2 h-2 bg-[#4a5c23] rounded-full" />
-                <span className="text-sm font-medium">Our Story</span>
+                <span className="text-sm font-medium">Who we are</span>
               </div>
 
               <h2 className="mt-6 text-4xl md:text-5xl font-bold leading-tight">
-                Born in the mountains,
+                Based in Bishkek,
                 <br />
-                made for explorers.
+                here to help you explore.
               </h2>
 
               <div className="mt-7 space-y-5 text-gray-600 text-lg leading-relaxed">
                 <p>
-                  Kyrgyz Tours was created from a simple idea:{" "}
+                  Kyrgyz Tours is a Bishkek-based travel company with a simple focus:{" "}
                   <span className="font-semibold text-gray-900">
-                    Kyrgyzstan deserves to be discovered.
+                    making it easier to plan a trip around Kyrgyzstan.
                   </span>
                 </p>
 
                 <p>
-                  What started as a small local team with a passion for
-                  our country's mountains, lakes and nomadic culture grew
-                  into a travel company focused on creating authentic
-                  experiences for travelers from around the world.
+                  We bring routes, destinations and practical travel details together so visitors can compare options and contact us about the journey that suits them.
                 </p>
 
                 <p>
-                  We believe that traveling through Kyrgyzstan is not
-                  simply about visiting beautiful places. It is about
-                  drinking tea in a yurt, meeting local families, riding
-                  through mountain valleys, waking up beside a mountain
-                  lake and experiencing a culture that has remained deeply
-                  connected to its traditions.
+                  A trip here can include city life, mountain trails, lakeside stops and time in a yurt. Each itinerary explains what is planned; the final arrangements are confirmed with you before the trip.
                 </p>
 
                 <p>
-                  Our goal is to make those experiences accessible,
-                  comfortable and unforgettable.
+                  Tell us your dates, group size and interests, and we can help you understand which published route may fit.
                 </p>
               </div>
 
@@ -247,19 +238,17 @@ const About = () => {
         <div className="max-w-5xl mx-auto text-center">
           <div className="inline-flex items-center gap-2 bg-white rounded-full px-4 py-2">
             <span className="w-2 h-2 bg-[#4a5c23] rounded-full" />
-            <span className="text-sm font-medium">Our Mission</span>
+            <span className="text-sm font-medium">What to expect</span>
           </div>
 
           <h2 className="mt-6 text-4xl md:text-6xl font-bold leading-tight">
-            To show the world
+            Travel at your own pace,
             <br />
-            the real Kyrgyzstan.
+            discover Kyrgyzstan.
           </h2>
 
           <p className="mt-7 text-lg md:text-xl text-gray-600 leading-relaxed max-w-3xl mx-auto">
-            We want every traveler who visits Kyrgyzstan to leave with
-            more than photographs. We want them to leave with stories,
-            friendships, memories and a genuine connection to our country.
+            Compare routes, ask questions and confirm the details directly with our team before you book. We aim to make planning clear while leaving room for the people and places you meet along the way.
           </p>
         </div>
       </section>
@@ -270,16 +259,15 @@ const About = () => {
           <div className="max-w-2xl">
             <div className="inline-flex items-center gap-2 bg-[#c9cebd] rounded-full px-4 py-2">
               <span className="w-2 h-2 bg-[#4a5c23] rounded-full" />
-              <span className="text-sm font-medium">What We Believe In</span>
+            <span className="text-sm font-medium">How we work</span>
             </div>
 
             <h2 className="mt-6 text-4xl md:text-5xl font-bold">
-              Our Values
+              A thoughtful way to travel
             </h2>
 
             <p className="mt-5 text-lg text-gray-600 leading-relaxed">
-              These principles shape every journey we create and every
-              traveler we welcome.
+              Clear itineraries, local context and direct communication help you plan with confidence.
             </p>
           </div>
 
@@ -375,16 +363,15 @@ const About = () => {
           <div className="text-center max-w-3xl mx-auto">
             <div className="inline-flex items-center gap-2 bg-[#c9cebd] rounded-full px-4 py-2">
               <span className="w-2 h-2 bg-[#4a5c23] rounded-full" />
-              <span className="text-sm font-medium">By The Numbers</span>
+              <span className="text-sm font-medium">Choose your trip length</span>
             </div>
 
             <h2 className="mt-6 text-4xl md:text-5xl font-bold">
-              Our Journey So Far
+              Routes from a few days to two weeks
             </h2>
 
             <p className="mt-5 text-lg text-gray-600">
-              Every number represents people, places and memories that
-              have become part of our story.
+              Start with a short stay near Bishkek, focus on the alpine lakes, visit Karakol in winter or explore more of the country on a longer itinerary.
             </p>
           </div>
 
@@ -415,49 +402,46 @@ const About = () => {
               <div className="inline-flex items-center gap-2 bg-[#c9cebd] rounded-full px-4 py-2">
                 <span className="w-2 h-2 bg-[#4a5c23] rounded-full" />
                 <span className="text-sm font-medium">
-                  What's Next
+                  Plan with clear details
                 </span>
               </div>
 
               <h2 className="mt-6 text-4xl md:text-5xl font-bold leading-tight">
-                We are just
+                Know the route
                 <br />
-                getting started.
+                before you book.
               </h2>
 
               <p className="mt-6 text-lg text-gray-600 leading-relaxed">
-                Our vision goes beyond organizing tours. We are building
-                a complete way for travelers to discover Kyrgyzstan —
-                from finding the perfect destination to planning an
-                entire journey.
+                Review the itinerary, check the price and send us your preferred dates. We will confirm availability and the final arrangements with you.
               </p>
 
               <div className="mt-8 space-y-4">
                 <div className="flex gap-4">
                   <div className="w-2 h-2 bg-[#4A5C23] rounded-full mt-2.5 shrink-0" />
                   <p className="text-gray-700">
-                    Expand our network of local guides and partners.
+                    Choose the route and travel dates that suit your plans.
                   </p>
                 </div>
 
                 <div className="flex gap-4">
                   <div className="w-2 h-2 bg-[#4A5C23] rounded-full mt-2.5 shrink-0" />
                   <p className="text-gray-700">
-                    Create more unique and personalized travel experiences.
+                    Tell us about your group size and travel preferences.
                   </p>
                 </div>
 
                 <div className="flex gap-4">
                   <div className="w-2 h-2 bg-[#4A5C23] rounded-full mt-2.5 shrink-0" />
                   <p className="text-gray-700">
-                    Build a smart travel platform for discovering Kyrgyzstan.
+                    Ask about accommodation, transport and what is included.
                   </p>
                 </div>
 
                 <div className="flex gap-4">
                   <div className="w-2 h-2 bg-[#4A5C23] rounded-full mt-2.5 shrink-0" />
                   <p className="text-gray-700">
-                    Welcome travelers from more countries around the world.
+                    Confirm availability and payment arrangements with our team.
                   </p>
                 </div>
               </div>
@@ -481,31 +465,37 @@ const About = () => {
             <div className="grid gap-10 md:grid-cols-2 md:items-center md:gap-14">
               <div className="text-center md:text-left">
                 <h2 className="text-4xl md:text-5xl font-bold">
-                  Your Kyrgyzstan adventure starts here.
+                  Ready to explore Kyrgyzstan?
                 </h2>
 
                 <p className="max-w-2xl mt-5 text-lg text-white/75">
-                  Explore breathtaking landscapes, experience nomadic culture
-                  and create memories that stay with you long after the journey.
+                  Browse the itineraries or get in touch with your dates and questions. We will help you take the next step.
                 </p>
 
                 <a
                   href="/itineraries"
                   className="inline-flex items-center gap-2 mt-7 bg-white text-gray-900 px-8 py-4 rounded-full font-semibold hover:bg-gray-100 transition-colors"
                 >
-                  Explore Our Itineraries
+                  Browse itineraries
                   <ArrowRight className="w-5 h-5" />
                 </a>
               </div>
 
               <blockquote className="border-l-2 border-[#d7b85a] pl-6 md:pl-8">
-                <div className="mb-4 flex gap-1 text-[#d7b85a]" aria-label={`${featuredTestimonial?.rating || 5} out of 5 stars`}>
-                  {Array.from({ length: featuredTestimonial?.rating || 5 }, (_, i) => <Star key={i} className="h-4 w-4 fill-current" />)}
-                </div>
-                <p className="text-xl leading-relaxed md:text-2xl">
-                  “{featuredTestimonial?.text || "Discover the places and culture that make every Kyrgyzstan journey unique."}”
-                </p>
-                <footer className="mt-5 text-sm text-white/65">{featuredTestimonial?.name || "Kyrgyz Tours"} <span className="mx-1">·</span> {featuredTestimonial?.country || "Traveler"}</footer>
+                {featuredTestimonial && <div className="mb-4 flex gap-1 text-[#d7b85a]" aria-label={`${featuredTestimonial.rating} out of 5 stars`}>
+                  {Array.from({ length: featuredTestimonial.rating }, (_, i) => <Star key={i} className="h-4 w-4 fill-current" />)}
+                </div>}
+                {featuredTestimonial ? (
+                  <>
+                    <p className="text-xl leading-relaxed md:text-2xl">“{featuredTestimonial.text}”</p>
+                    <footer className="mt-5 text-sm text-white/65">{featuredTestimonial.name} <span className="mx-1">·</span> {featuredTestimonial.country}</footer>
+                  </>
+                ) : (
+                  <>
+                    <p className="text-xl leading-relaxed md:text-2xl">A clear route, practical trip details and a direct way to ask questions before you book.</p>
+                    <footer className="mt-5 text-sm text-white/65">Kyrgyz Tours · Bishkek</footer>
+                  </>
+                )}
               </blockquote>
             </div>
           </div>

@@ -20,6 +20,7 @@ import FiveDays from "../assets/images/5-days.webp";
 import FourteenDays from "../assets/images/14-days.webp";
 import SavedHero from "../assets/images/site/hero/hero-saved.jpg";
 import { useLanguage } from "../lib/language";
+import { isPublicTourContent } from "../lib/tourContent";
 
 const FAVORITES_KEY = "kyrgyz-tours-favorites";
 
@@ -97,7 +98,7 @@ const SavedTours = () => {
         console.error("Failed to load saved tours:", queryError.message);
         setError("We couldn't load your saved journeys. Please try again.");
       } else {
-        setTours((data ?? []) as Tour[]);
+        setTours(((data ?? []) as Tour[]).filter(isPublicTourContent));
       }
 
       setLoading(false);

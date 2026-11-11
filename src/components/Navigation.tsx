@@ -9,7 +9,7 @@ const Navigation = () => {
   const [menuOpen, setMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const location = useLocation();
-  const { language, setLanguage, t } = useLanguage();
+  const { t } = useLanguage();
 
   useEffect(() => {
     const updateScroll = () => setScrolled(window.scrollY > 70);
@@ -29,8 +29,7 @@ const Navigation = () => {
     { name: "Home", path: "/" },
     { name: "About Us", path: "/about" },
     { name: "Itineraries", path: "/itineraries" },
-    { name: "Gallery", path: "/gallery" },
-    { name: "Testimonials", path: "/testimonials" },
+    { name: "Blog", path: "/blog" },
     { name: "Map", path: "/map" },
     { name: "Favorites", path: "/saved", icon: true },
     { name: "Contact Us", path: "/contact" },
@@ -78,18 +77,6 @@ const Navigation = () => {
             ))}
           </div>
 
-          <label className="ml-auto mr-4 hidden items-center gap-2 text-xs font-medium lg:flex" aria-label={t("Language")}>
-            <span className="sr-only">{t("Language")}</span>
-            <select
-              value={language}
-              onChange={(event) => setLanguage(event.target.value as "en" | "ru")}
-              className="kt-nav-link cursor-pointer rounded-full border border-current/15 bg-transparent px-3 py-2 text-xs outline-none"
-            >
-              <option value="en">EN</option>
-              <option value="ru">RU</option>
-            </select>
-          </label>
-
           <button
             type="button"
             onClick={() => setMenuOpen((open) => !open)}
@@ -116,13 +103,6 @@ const Navigation = () => {
                 {t(item.name)}
               </Link>
             ))}
-            <label className="flex items-center justify-between rounded-xl px-4 py-3 text-sm">
-              {t("Language")}
-              <select value={language} onChange={(event) => setLanguage(event.target.value as "en" | "ru")} className="rounded-lg border border-current/20 bg-transparent px-3 py-2">
-                <option value="en">English</option>
-                <option value="ru">Русский</option>
-              </select>
-            </label>
           </div>
         )}
       </div>

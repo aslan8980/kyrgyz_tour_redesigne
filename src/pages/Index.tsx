@@ -8,13 +8,14 @@ import Hero from "../components/Hero";
 import Welcome from "../components/Welcome";
 import ImageCard from "@/components/ImageCard";
 
-import Gallery from "./Gallery";
+import BlogSection from "../components/BlogSection";
 import Testimonials from "./Testimonials";
 import Contact from "./Contact us";
 import { supabase } from "../lib/supabase";
 
 import { itinerariesCard } from "../data";
 import { useLanguage } from "../lib/language";
+import { isPublicTourContent } from "../lib/tourContent";
 
 const Index = () => {
   const { t } = useLanguage();
@@ -32,7 +33,7 @@ const Index = () => {
         if (!active) return;
         if (error) console.error("Failed to load seasonal tours:", error.message);
         else {
-          setHomeTours(data ?? []);
+          setHomeTours((data ?? []).filter(isPublicTourContent));
           setHomeToursLoaded(true);
         }
       });
@@ -102,26 +103,19 @@ const Index = () => {
       {/* Itineraries */}
       <section
         id="itineraries"
-        className="kt-section-blend relative bg-[#f5f6f1] py-20 text-[#283128] md:py-24"
+        className="kt-section-blend relative bg-[#f5f6f1] py-14 text-[#283128] md:py-16"
       >
         <div className="container mx-auto px-4">
 
           {/* Section heading */}
-          <div className="text-center mb-12 md:mb-14">
-            <div className="inline-flex items-center gap-2 bg-[#e4e8dc] rounded-full px-4 py-2 mx-auto">
-              <h3 className="font-AlbertSans font-semibold text-[#283128] flex items-center justify-center gap-2">
-                <span className="w-2 h-2 bg-[#4a5c23] rounded-full"></span>
-                {t("Kyrgyzstan Itineraries")}
-              </h3>
-            </div>
-
-            <h2 className="font-AlbertSans text-4xl md:text-4xl font-bold text-[#283128] mt-3">
-              {t("Explore Kyrgyzstan with Expert-Planned Journeys")}
+          <div className="mb-8 text-center md:mb-10">
+            <h2 className="font-AlbertSans text-4xl font-bold text-[#283128]">
+              {t("Journeys through Kyrgyzstan")}
             </h2>
           </div>
 
           {/* Itinerary cards */}
-          <ImageCard arr={homeToursLoaded
+          <ImageCard arr={homeToursLoaded && homeTours.length > 0
             ? homeTours.map((tour) => ({
               id: tour.id,
               img: tour.main_image || itinerariesCard.find((item) => item.url.endsWith(`/${tour.slug}`))?.img || itinerariesCard[0].img,
@@ -133,9 +127,9 @@ const Index = () => {
         </div>
       </section>
 
-      {/* Gallery */}
-      <section id="gallery">
-        <Gallery />
+      {/* Blog */}
+      <section id="blog">
+        <BlogSection />
       </section>
 
       {/* Testimonials */}

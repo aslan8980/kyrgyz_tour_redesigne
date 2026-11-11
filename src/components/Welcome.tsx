@@ -22,14 +22,6 @@ const Welcome = () => {
         
         {/* Text */}
         <div className="space-y-6">
-          <h3 className="inline-flex items-center gap-2 bg-[#e9eddf] border border-[#dfe4d5] text-[#283128] rounded-full px-4 py-2">
-            <span className="w-2 h-2 bg-[#4a5c23] rounded-full"></span>
-
-            <span className="text-sm font-medium">
-              {t("Welcome to Kyrgyzstan")}
-            </span>
-          </h3>
-
           <h2 className="text-4xl md:text-5xl font-bold leading-tight">
             {t("Discover the Land of Mountains and Nomads")}
           </h2>

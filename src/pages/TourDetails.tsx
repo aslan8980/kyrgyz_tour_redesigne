@@ -45,6 +45,7 @@ import Navigation from "../components/Navigation";
 import PageHero from "../components/PageHero";
 import { supabase } from "../lib/supabase";
 import { usePublicTestimonials } from "../hooks/usePublicTestimonials";
+import { isPublicTourContent } from "../lib/tourContent";
 
 import ThreeDays from "../assets/images/3-days.webp";
 import FourDays from "../assets/images/4-days.webp";
@@ -408,7 +409,7 @@ const TourDetails = () => {
         setLoadError("We couldn't load this tour. Please try again later.");
         setAllTours([]);
       } else {
-        setAllTours(((data || []) as DatabaseTour[]).map(mapTour));
+        setAllTours(((data || []) as DatabaseTour[]).filter(isPublicTourContent).map(mapTour));
         setLoadError("");
       }
       setLoading(false);

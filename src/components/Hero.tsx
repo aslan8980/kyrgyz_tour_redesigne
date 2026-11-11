@@ -1,11 +1,7 @@
 
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import {
-  ArrowUpRight,
-  ChevronLeft,
-  ChevronRight,
-} from "lucide-react";
+import { ArrowUpRight } from "lucide-react";
 import Slide2 from "../assets/images/site/hero/home-journey-b.jpg";
 import Slide3 from "../assets/images/site/hero/home-journey-c.jpg";
 import { useLanguage } from "../lib/language";
@@ -14,26 +10,26 @@ const slides = [
   {
     image: "/images/kyrgyzstan-hero.png",
     imageAlt: "A mountain road crossing the Tian Shan in Kyrgyzstan",
-    eyebrow: "ADVENTURE · NATURE · CULTURE",
-    title: "Kyrgyzstan.\nA journey beyond.",
+    eyebrow: "MOUNTAINS · LAKES · CULTURE",
+    title: "Kyrgyzstan,\ncloser than you think.",
     description:
-      "Discover breathtaking mountain landscapes, crystal-clear alpine lakes and the timeless traditions of nomadic life.",
+      "Plan a journey through mountain valleys, high-altitude lakes and the living traditions of Kyrgyzstan.",
   },
   {
     image: Slide2,
     imageAlt: "A horse rider crossing an alpine valley with yurts in Kyrgyzstan",
     eyebrow: "WILD LANDSCAPES · OPEN ROADS",
-    title: "Find your\nown adventure.",
+    title: "Choose your\nkind of journey.",
     description:
-      "Travel through high mountain passes, hidden valleys and extraordinary places far from the ordinary.",
+      "Choose a short escape or a longer route, then shape the details around your dates and travel style.",
   },
   {
     image: Slide3,
     imageAlt: "Kyrgyz family welcoming travelers beside a yurt",
     eyebrow: "TRADITION · HOSPITALITY · DISCOVERY",
-    title: "Feel the spirit\nof the mountains.",
+    title: "Meet the people\nand places of Kyrgyzstan.",
     description:
-      "Meet local people, discover authentic culture and experience the beauty of Kyrgyzstan.",
+      "Explore the country at a thoughtful pace, with time for its landscapes, towns and local culture.",
   },
 ];
 
@@ -58,12 +54,6 @@ const Hero = () => {
       window.location.href = "/itineraries";
     }
   };
-
-  const nextSlide = () =>
-    setCurrentSlide((prev) => (prev + 1) % slides.length);
-
-  const prevSlide = () =>
-    setCurrentSlide((prev) => (prev - 1 + slides.length) % slides.length);
 
   return (
     <section className="kt-hero relative isolate h-[100svh] min-h-[680px] max-h-[1100px] w-full overflow-hidden text-white">
@@ -118,7 +108,7 @@ const Hero = () => {
                   variant="outline"
                   className="h-[54px] rounded-full border border-white/75 bg-transparent px-7 text-xs font-normal tracking-wide text-white transition hover:bg-white/15 hover:text-white"
                 >
-                  {t("Plan my trip")}
+                  {t("Plan a custom tour")}
                   <ArrowUpRight className="ml-3 h-4 w-4" strokeWidth={1.5} />
                 </Button>
               </div>
@@ -130,34 +120,6 @@ const Hero = () => {
       {/* Seamless fade into the next section */}
       <div className="pointer-events-none absolute inset-x-0 bottom-0 z-20 h-36 bg-gradient-to-b from-transparent via-black/10 to-[#171a17]" />
 
-      <div className="absolute bottom-8 left-6 z-30 flex items-center gap-3 text-[10px] font-light uppercase tracking-[0.18em] text-white/90 sm:left-10 lg:left-16">
-        <span className="h-px w-7 bg-white/80" />
-        KYRGYZSTAN · CENTRAL ASIA
-      </div>
-
-      <div className="absolute bottom-6 right-6 z-30 flex items-center gap-3 sm:right-10 lg:right-16">
-        <span className="mr-2 text-[11px] font-light tracking-widest">
-          0{currentSlide + 1} / 0{slides.length}
-        </span>
-
-        <button
-          type="button"
-          onClick={prevSlide}
-          aria-label="Previous slide"
-          className="flex h-11 w-11 items-center justify-center rounded-full border border-white/70 bg-transparent transition hover:bg-white/15"
-        >
-          <ChevronLeft size={19} strokeWidth={1.4} />
-        </button>
-
-        <button
-          type="button"
-          onClick={nextSlide}
-          aria-label="Next slide"
-          className="flex h-11 w-11 items-center justify-center rounded-full border border-white/70 bg-transparent transition hover:bg-white/15"
-        >
-          <ChevronRight size={19} strokeWidth={1.4} />
-        </button>
-      </div>
     </section>
   );
 };

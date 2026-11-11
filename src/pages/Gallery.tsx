@@ -161,10 +161,10 @@ const Gallery = () => {
               <footer className="mt-5 text-sm text-white/65">{featuredReview.name} <span className="mx-1">·</span> {featuredReview.country}</footer>
             </blockquote>}
             <div className={featuredReview ? "text-center md:text-left" : "text-center"}>
-              <h2 className="text-4xl font-bold md:text-5xl">Ready to see it<br className="hidden md:block" /> for yourself?</h2>
-              <p className="mt-5 text-lg text-white/75">Your Kyrgyzstan story could be the next one in our gallery.</p>
+              <h2 className="text-4xl font-bold md:text-5xl">Ready to explore Kyrgyzstan?</h2>
+              <p className="mt-5 text-lg text-white/75">Browse the routes or tell us what you would like to see on your trip.</p>
               <a href="/contact" className="mt-7 inline-flex items-center gap-2 rounded-full bg-white px-8 py-4 font-semibold text-gray-900 transition-colors hover:bg-gray-100">
-                Start Your Journey <ArrowRight className="h-5 w-5" />
+                Browse tours <ArrowRight className="h-5 w-5" />
               </a>
             </div>
           </div>
